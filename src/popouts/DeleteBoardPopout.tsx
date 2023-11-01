@@ -1,16 +1,18 @@
 import { Alert } from '@vkontakte/vkui';
-import { FC, SetStateAction, ReactNode, MouseEvent } from 'react'
-import { onClickRemoveBoard } from '../types';
+import { FC, MouseEvent, useContext } from 'react'
+import { TInterfaceContext, onClickRemoveBoard } from '../types';
+import { interfaceContext } from '../panels/Panels';
 
 interface Props {
   callback: onClickRemoveBoard,
-  setPopout: (value: SetStateAction<ReactNode | null>) => void,
-  i: number,
-  e: MouseEvent<SVGSVGElement, globalThis.MouseEvent>,
+  boardId: number,
   boardName: string
 };
 
-const DeleteBoardPopout: FC<Props> = ({ callback, setPopout, i, e, boardName }) => {
+const DeleteBoardPopout: FC<Props> = ({ callback, boardId, boardName }) => {
+
+  const {popouts: {setPopout}} = useContext(interfaceContext) as TInterfaceContext;
+
   return (
     <Alert
       onClose={() => setPopout(null)}
@@ -25,7 +27,7 @@ const DeleteBoardPopout: FC<Props> = ({ callback, setPopout, i, e, boardName }) 
           title: "Удалить доску",
           mode: "destructive",
           autoClose: true,
-          action: () => callback(i, e)
+          action: () => callback(boardId)
         }
       ]}
       actionsLayout="horizontal"

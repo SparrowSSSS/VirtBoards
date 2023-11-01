@@ -1,6 +1,7 @@
 const panels = {
     home: "home",
-    board: "board"
+    board: "board",
+    documentation: "documentation"
 };
 
 export default panels;

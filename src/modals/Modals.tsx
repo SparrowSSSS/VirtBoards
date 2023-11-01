@@ -1,18 +1,17 @@
 import { ModalPage, ModalPageHeader, ModalRoot } from '@vkontakte/vkui';
-import {FC, SetStateAction} from 'react'
+import {FC, useContext} from 'react'
 import AddBoardModal from './AddBoardModal';
-
-interface Props {
-    activeModal: string | null,
-    setActiveModal: (value: SetStateAction<string | null>) => void
-}
+import { interfaceContext } from '../panels/Panels';
+import { TInterfaceContext } from '../types';
 
 export const modals = {
     addBoardModal: "add-board-modal"
 }
 
+const Modals: FC = () => {
 
-const Modals: FC<Props> = ({activeModal, setActiveModal}) => {
+    const {modals: {activeModal, setActiveModal}} = useContext(interfaceContext) as TInterfaceContext;
+
     return (
         <ModalRoot activeModal={activeModal}>
             <ModalPage 
