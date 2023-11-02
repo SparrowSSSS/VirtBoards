@@ -13,7 +13,8 @@
 }
 
 .boardBottomPanelFullScreen {
-    width: 400px;
+    min-width: 300px;
+    max-width: 400px;
     right: 3%;
     bottom: 5%;
     justify-content: space-between;

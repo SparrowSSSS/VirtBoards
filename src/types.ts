@@ -9,12 +9,14 @@ export type BoardComponent = {
     type: string
 };
 
+export type TSettings = {
+    grid?: boolean
+}
+
 export type BoardData = {
     name: string,
     id: number,
-    settings: {
-        grid: boolean
-    },
+    settings: TSettings,
     components: BoardComponent[]
 };
 
