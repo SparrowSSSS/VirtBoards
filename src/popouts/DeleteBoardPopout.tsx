@@ -1,17 +1,43 @@
 import { Alert } from '@vkontakte/vkui';
-import { FC, MouseEvent, useContext } from 'react'
-import { TInterfaceContext, onClickRemoveBoard } from '../types';
+import { FC, useContext } from 'react'
+import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../types';
 import { interfaceContext } from '../panels/Panels';
+import { dbContext } from '../App';
+import { deleteBoard } from '../services/indexedDBServices';
+import getErrorMessage from '../utils/alertError';
 
 interface Props {
-  callback: onClickRemoveBoard,
   boardId: number,
   boardName: string
 };
 
-const DeleteBoardPopout: FC<Props> = ({ callback, boardId, boardName }) => {
+const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
 
-  const {popouts: {setPopout}} = useContext(interfaceContext) as TInterfaceContext;
+  const { popouts: { setPopout }, boards: { boardsList, setBoardsList } } = useContext(interfaceContext) as TInterfaceContext;
+
+  const db = useContext(dbContext);
+
+  const removeBoard: onClickRemoveBoard = async (boardId) => {
+    if (db) {
+      try {
+        await deleteBoard(db, boardId);
+      } catch (e) {
+        alert(getErrorMessage(e, "Не удалось удалить доску"));
+        return;
+      }
+
+      const list = [...(boardsList as BoardNameAndId[])];
+
+      list.find((board, i) => {
+        if (board.id === boardId) {
+          list.splice(i, 1);
+          return true;
+        };
+      });
+
+      setBoardsList(list);
+    };
+  };
 
   return (
     <Alert
@@ -27,7 +53,7 @@ const DeleteBoardPopout: FC<Props> = ({ callback, boardId, boardName }) => {
           title: "Удалить доску",
           mode: "destructive",
           autoClose: true,
-          action: () => callback(boardId)
+          action: () => removeBoard(boardId)
         }
       ]}
       actionsLayout="horizontal"

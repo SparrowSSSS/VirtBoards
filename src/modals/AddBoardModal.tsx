@@ -1,9 +1,10 @@
 import { Button, FormItem, FormLayout, Group, Input } from "@vkontakte/vkui";
 import { FC, useContext, useState } from "react";
-import addBoard from "../services/addBoard";
+import { addBoard } from "../services/indexedDBServices";
 import { dbContext } from "../App";
 import { interfaceContext } from "../panels/Panels";
 import { BoardNameAndId, TInterfaceContext } from "../types";
+import getErrorMessage from "../utils/alertError";
 
 const AddBoardModal: FC = () => {
 
@@ -23,7 +24,7 @@ const AddBoardModal: FC = () => {
             try {
                 await addBoard(db, board);
             } catch (e) {
-                alert("Произошла ошибка: " + (e as Error).message);
+                alert(getErrorMessage(e, "Не удалось добавить доску"));
                 return;
             };
 

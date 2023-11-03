@@ -1,12 +1,14 @@
 import { Avatar, Group, Link, Panel, PanelHeader, Placeholder, Separator } from "@vkontakte/vkui";
 import { FC, useContext, useEffect, useState } from "react";
-import { BoardNameAndId, TInterfaceContext } from "../types";
+import { TInterfaceContext } from "../types";
 import BoardsList from "../components/BoardsList";
 import { dbContext } from "../App";
-import getBoardsList from "../services/getBoadrsList";
+import { getBoardsList } from "../services/indexedDBServices";
 import { interfaceContext } from "./Panels";
 import panels from "../panels";
 import localStorages from "../localStorages";
+import { getUserName } from "../services/bridgeServices";
+import getErrorMessage from "../utils/alertError";
 
 interface Props {
   id: string
@@ -15,6 +17,8 @@ interface Props {
 const Home: FC<Props> = ({ id }) => {
 
   const { boards: { setBoardsList }, panels: { setActivePanel } } = useContext(interfaceContext) as TInterfaceContext;
+
+  const [userName, setUserName] = useState("");
 
   const db = useContext(dbContext);
 
@@ -25,8 +29,10 @@ const Home: FC<Props> = ({ id }) => {
 
   useEffect(() => {
     if (db) {
-      getBoardsList(db).then(boardsList => setBoardsList(boardsList), error => alert("Произошла ошибка: " + (error as Error).message));
+      getBoardsList(db).then(boardsList => setBoardsList(boardsList), error => alert(getErrorMessage(error, "Ошибка удалось получить список досок")));
     };
+
+    getUserName().then(name => setUserName(name), error => alert(getErrorMessage(error, "Не удалось получить имя пользователя")));
   }, [db]);
 
   return (
@@ -35,7 +41,7 @@ const Home: FC<Props> = ({ id }) => {
       <Group>
         <Placeholder
           icon={<Avatar size={56} />}
-          header="Добро пожаловать, Новосельцев Владислав"
+          header={`Добро пожаловать, ${userName ? userName : "..."}`}
         >
           Мы рады видеть вас! Если вы впервые запустили приложение, то для вас не бесполезным будет ознакомление с <Link onClick={() => go(panels.documentation)}>документацией</Link>
         </Placeholder>

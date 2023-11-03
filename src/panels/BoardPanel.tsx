@@ -5,8 +5,9 @@ import localStorages from "../localStorages";
 import { interfaceContext } from "./Panels";
 import { BoardData, TInterfaceContext } from "../types";
 import { dbContext } from "../App";
-import getBoardData from "../services/getBoardData";
+import { getBoardData } from "../services/indexedDBServices";
 import Board from "../components/board/Board";
+import getErrorMessage from "../utils/alertError";
 
 interface Props {
   id: string
@@ -33,7 +34,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
 
   useEffect(() => {
     if (db) {
-      getBoardData(db, boardId).then(boardData => setBoardData(boardData), error => alert("Произошла ошибка: " + (error as Error).message));
+      getBoardData(db, boardId).then(boardData => setBoardData(boardData), error => alert(getErrorMessage(error, "Не удалось получить данные доски")));
     };
   }, [boardId, db]);
 

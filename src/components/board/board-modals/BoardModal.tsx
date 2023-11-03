@@ -8,22 +8,6 @@ export const BoardModal: FC = ({ children }: { children?: ReactNode }) => {
 
     const { setBoardModal } = useContext(boardContext) as TBoardContext;
 
-    /** 
-    const renderModal = () => {
-        const modal = document.querySelector(`.${styles.boardModal}`) as HTMLDivElement;
-        const boardModalCancel = document.querySelector(`.${styles.boardModalCancel}`) as HTMLDivElement;
-
-        const style = getComputedStyle(modal);
-
-        boardModalCancel.style.left = `${parseInt(style.left) + parseInt(style.width) / 2 + 20}px`;
-        boardModalCancel.style.top = `${parseInt(style.top) - parseInt(style.height) / 2}px`;
-    };
-
-    useEffect(() => {
-        renderModal()
-    }, []);
-    */
-
     return (
         <>
             <div className={styles.boardModalOverlay} />
