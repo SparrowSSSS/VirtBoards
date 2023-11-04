@@ -1,11 +1,11 @@
 import { Icon24Cancel } from '@vkontakte/icons';
 import { Cell } from '@vkontakte/vkui';
 import { FC, useContext, MouseEvent } from 'react';
-import localStorages from '../localStorages';
-import panels from '../panels';
+import localStorages from '../config/localStorages';
+import panels from '../config/panels';
 import { interfaceContext } from '../panels/Panels';
 import DeleteBoardPopout from '../popouts/DeleteBoardPopout';
-import { BoardNameAndId, TInterfaceContext } from '../types';
+import { BoardNameAndId, TInterfaceContext } from '../config/types';
 
 interface Props {
     board: BoardNameAndId

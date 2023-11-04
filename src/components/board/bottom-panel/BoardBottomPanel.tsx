@@ -1,5 +1,5 @@
 import { FC, useContext } from 'react';
-import { BoardData, TBoardContext } from '../../../types';
+import { BoardData, TBoardContext } from '../../../config/types';
 import { Icon24Fullscreen, Icon24FullscreenExit } from '@vkontakte/icons';
 import styles from "./BoardBottomPanel.module.css"
 import { Icon24Settings } from '@vkontakte/icons';

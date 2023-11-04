@@ -2,7 +2,7 @@ import { FC, ReactNode, useContext, useEffect } from 'react';
 import styles from "./BoardModal.module.css";
 import { Icon24CancelOutline } from '@vkontakte/icons';
 import { boardContext } from '../Board';
-import { TBoardContext } from '../../../types';
+import { TBoardContext } from '../../../config/types';
 
 export const BoardModal: FC = ({ children }: { children?: ReactNode }) => {
 

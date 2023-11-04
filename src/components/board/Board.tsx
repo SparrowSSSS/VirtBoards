@@ -1,6 +1,6 @@
 import { FC, createContext, SetStateAction, useRef, useEffect, useState, ReactNode } from 'react';
 import styles from "./Board.module.css";
-import { BoardData, TBoardContext } from '../../types';
+import { BoardData, TBoardContext } from '../../config/types';
 import BoardBottomPanel from './bottom-panel/BoardBottomPanel';
 import Grid from './grid/Grid';
 import BoardModal from './board-modals/BoardModal';

@@ -2,7 +2,7 @@ import { ModalPage, ModalPageHeader, ModalRoot } from '@vkontakte/vkui';
 import {FC, useContext} from 'react'
 import AddBoardModal from './AddBoardModal';
 import { interfaceContext } from '../panels/Panels';
-import { TInterfaceContext } from '../types';
+import { TInterfaceContext } from '../config/types';
 
 export const modals = {
     addBoardModal: "add-board-modal"

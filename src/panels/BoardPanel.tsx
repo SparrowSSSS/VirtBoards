@@ -1,13 +1,14 @@
 import { Div, Group, Panel, PanelHeader, PanelHeaderBack, Platform, Separator, Spinner, usePlatform } from "@vkontakte/vkui";
 import { FC, useContext, useEffect, useState } from "react";
-import panels from "../panels";
-import localStorages from "../localStorages";
+import panels from "../config/panels";
+import localStorages from "../config/localStorages";
 import { interfaceContext } from "./Panels";
-import { BoardData, TInterfaceContext } from "../types";
+import { BoardData, TInterfaceContext } from "../config/types";
 import { dbContext } from "../App";
-import { getBoardData } from "../services/indexedDBServices";
+import { getBoardData } from "../services/generalServices";
 import Board from "../components/board/Board";
 import getErrorMessage from "../utils/alertError";
+import errorsPS from "../config/errorsPS";
 
 interface Props {
   id: string
@@ -34,7 +35,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
 
   useEffect(() => {
     if (db) {
-      getBoardData(db, boardId).then(boardData => setBoardData(boardData), error => alert(getErrorMessage(error, "Не удалось получить данные доски")));
+      getBoardData(boardId, db).then(boardData => setBoardData(boardData), error => alert(getErrorMessage(error, errorsPS.getBoardData)));
     };
   }, [boardId, db]);
 

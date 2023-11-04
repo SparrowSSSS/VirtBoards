@@ -14,7 +14,7 @@ const App = () => {
 
 	useEffect(() => {
 		useBD().then(bd => setBD(bd), error => alert(getErrorMessage(error, "Не удалось подключиться к локальной базе данных")));
-	}, [])
+	}, []);
 
 	return (
 		<ConfigProvider>

@@ -1,6 +1,6 @@
 import { IDBPDatabase } from "idb";
 import { MyDB } from "../hooks/useDB";
-import { BoardData, BoardNameAndId } from "../types";
+import { BoardData } from "../config/types";
 
 export const updateBoardData = async (db: IDBPDatabase<MyDB>, boardData: BoardData) => {
     const transaction = db.transaction("boards", "readwrite");
@@ -21,49 +21,34 @@ export const getBoardData = async (db: IDBPDatabase<MyDB>, boardId: number): Pro
 
     try {
         const boardData = await boards.get(boardId) as BoardData;
+
+        if (!boardData) throw new Error("Данные в локальном хранилище отсутствуют");
+        
         return boardData;
     } catch(e) {
         throw e;
     };
 };
 
-export const getBoardsList = async (db: IDBPDatabase<MyDB>): Promise<BoardNameAndId[]> => {
-    const transaction = db.transaction("boards-names", "readonly");
-
-    const boardsNames = transaction.objectStore("boards-names");
-
-    try {
-        const boardsList = await boardsNames.getAll();
-
-        return boardsList;
-    } catch (e) {
-        throw e;
-    };
-};
-
 export const deleteBoard = async (db: IDBPDatabase<MyDB>, boardId: number) => {
-    const transaction = db.transaction(["boards-names", "boards"], "readwrite");
+    const transaction = db.transaction("boards", "readwrite");
 
-    const boardsNames = transaction.objectStore("boards-names");
     const boards = transaction.objectStore("boards");
 
     try {
-        await boardsNames.delete(boardId);
         await boards.delete(boardId);
     } catch(e) {
         throw e;
     };
 };
 
-export const addBoard = async (db: IDBPDatabase<MyDB>, board: BoardNameAndId) => {
-    const transaction = db.transaction(["boards-names", "boards"], "readwrite");
+export const addBoard = async (db: IDBPDatabase<MyDB>, board: BoardData) => {
+    const transaction = db.transaction("boards", "readwrite");
 
-    const boardsNames = transaction.objectStore("boards-names");
     const boards = transaction.objectStore("boards");
 
     try {
-        await boardsNames.put(board);
-        await boards.put({...board, settings: {grid: true}, components: []});
+        await boards.put(board);
     } catch (e) {
         throw e;
     };

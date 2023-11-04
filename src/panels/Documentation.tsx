@@ -1,9 +1,9 @@
 import { Panel, PanelHeader, PanelHeaderBack, Platform, usePlatform } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
-import panels from '../panels';
-import localStorages from '../localStorages';
+import panels from '../config/panels';
+import localStorages from '../config/localStorages';
 import { interfaceContext } from './Panels';
-import { TInterfaceContext } from '../types';
+import { TInterfaceContext } from '../config/types';
 
 interface Props {
     id: string

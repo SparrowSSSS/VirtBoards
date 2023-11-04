@@ -1,7 +1,7 @@
 import { Icon24Add } from '@vkontakte/icons';
 import { Button, Group, Header, List, Placeholder, Spinner } from '@vkontakte/vkui';
 import { FC, useContext } from 'react';
-import { TInterfaceContext } from '../types';
+import { TInterfaceContext } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
 import { modals } from '../modals/Modals';
 import BoardsListComponent from './BoardsListComponent';
@@ -9,6 +9,14 @@ import BoardsListComponent from './BoardsListComponent';
 export const BoardsList: FC = () => {
 
     const { modals: { setActiveModal }, boards: { boardsList } } = useContext(interfaceContext) as TInterfaceContext;
+
+    const handleAddBoardButtonClick = () => {
+        if (boardsList.length < 3) {
+            setActiveModal(modals.addBoardModal);
+        } else {
+            alert("Максимальное количество доступных досок - 3");
+        };
+    };
 
     return (
         <>
@@ -28,7 +36,7 @@ export const BoardsList: FC = () => {
 
                 }
             </Group>
-            <Button size="m" before={<Icon24Add />} onClick={() => setActiveModal(modals.addBoardModal)}>Добавить доску</Button>
+            <Button size="m" before={<Icon24Add />} onClick={() => handleAddBoardButtonClick()}>Добавить доску</Button>
         </>
     )
 };

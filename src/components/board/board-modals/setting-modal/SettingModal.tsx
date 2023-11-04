@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Checkbox, Separator, Header } from '@vkontakte/vku
 import { FC, useContext, useState } from 'react'
 import { dbContext } from '../../../../App';
 import { updateBoardData } from '../../../../services/indexedDBServices';
-import { TBoardContext, TSettings } from '../../../../types';
+import { TBoardContext, TSettings } from '../../../../config/types';
 import { boardContext } from '../../Board';
 import { IDBPDatabase } from "idb";
 import { MyDB } from '../../../../hooks/useDB';

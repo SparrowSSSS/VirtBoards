@@ -2,10 +2,10 @@ import { SplitCol, SplitLayout, View } from "@vkontakte/vkui";
 import { useState, ReactNode, createContext } from "react";
 import Home from "./Home";
 import BoardPanel from "./BoardPanel";
-import panels from "../panels";
+import panels from "../config/panels";
 import Modals from "../modals/Modals";
-import localStorages from "../localStorages";
-import { BoardNameAndId, TInterfaceContext } from "../types";
+import localStorages from "../config/localStorages";
+import { BoardNameAndId, TInterfaceContext } from "../config/types";
 import Documentation from "./Documentation";
 
 export const interfaceContext = createContext<TInterfaceContext | undefined>(undefined);

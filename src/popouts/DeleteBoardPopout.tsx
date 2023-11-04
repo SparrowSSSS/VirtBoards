@@ -1,9 +1,9 @@
 import { Alert } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
-import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../types';
+import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
 import { dbContext } from '../App';
-import { deleteBoard } from '../services/indexedDBServices';
+import { deleteBoard } from '../services/generalServices';
 import getErrorMessage from '../utils/alertError';
 
 interface Props {
@@ -20,7 +20,7 @@ const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
   const removeBoard: onClickRemoveBoard = async (boardId) => {
     if (db) {
       try {
-        await deleteBoard(db, boardId);
+        await deleteBoard(boardId, db);
       } catch (e) {
         alert(getErrorMessage(e, "Не удалось удалить доску"));
         return;

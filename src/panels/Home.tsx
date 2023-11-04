@@ -1,12 +1,12 @@
 import { Avatar, Group, Link, Panel, PanelHeader, Placeholder, Separator } from "@vkontakte/vkui";
 import { FC, useContext, useEffect, useState } from "react";
-import { TInterfaceContext } from "../types";
+import { TInterfaceContext } from "../config/types";
 import BoardsList from "../components/BoardsList";
 import { dbContext } from "../App";
-import { getBoardsList } from "../services/indexedDBServices";
+import { getBoardsList } from "../services/bridgeServices";
 import { interfaceContext } from "./Panels";
-import panels from "../panels";
-import localStorages from "../localStorages";
+import panels from "../config/panels";
+import localStorages from "../config/localStorages";
 import { getUserName } from "../services/bridgeServices";
 import getErrorMessage from "../utils/alertError";
 
@@ -29,7 +29,7 @@ const Home: FC<Props> = ({ id }) => {
 
   useEffect(() => {
     if (db) {
-      getBoardsList(db).then(boardsList => setBoardsList(boardsList), error => alert(getErrorMessage(error, "Ошибка удалось получить список досок")));
+      getBoardsList().then(boardsList => setBoardsList(boardsList), error => alert(getErrorMessage(error, "Не удалось получить список досок")));
     };
 
     getUserName().then(name => setUserName(name), error => alert(getErrorMessage(error, "Не удалось получить имя пользователя")));
