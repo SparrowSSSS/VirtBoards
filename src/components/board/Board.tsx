@@ -40,7 +40,7 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
 
     return (
         <boardContext.Provider value={{ fullScreenBoard, setFullScreenBoard, boardData, setBoardData, setBoardModal }}>
-            <div ref={boardRef} className={`${styles.boardWindow} ${fullScreenBoard ? styles.boardWindowFullScreen : ""}`}>
+            <div ref={boardRef} className={styles.boardWindow}>
                 {boardModal && fullScreenBoard ? <BoardModal>{boardModal}</BoardModal> : null}
                 <div className={styles.boardCanvas} ref={boardCanvasRef}>
                     {boardData?.settings.grid ? <Grid boardCanvasSize={{ width: boardCanvasSize?.width as number, height: boardCanvasSize?.height as number}} /> : null}

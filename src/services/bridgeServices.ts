@@ -61,8 +61,16 @@ export const getBoardData = async (boardId: number): Promise<BoardData> => {
         if (keys.length) {
             return JSON.parse(keys[0].value);
         } else {
-            throw new Error("Данные доски отсутствуют в ВК хранилище");
+            throw new Error("Данные отсутствуют в ВК хранилище");
         };
+    } catch (e) {
+        throw e;
+    };
+};
+
+export const updateBoardData = async (boardId: number, boardData: BoardData) => {
+    try {
+        await bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${boardId}`, value: JSON.stringify(boardData) });
     } catch (e) {
         throw e;
     };

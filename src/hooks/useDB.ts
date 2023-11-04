@@ -1,5 +1,5 @@
 import { openDB, DBSchema } from 'idb';
-import { BoardData, BoardNameAndId } from '../config/types';
+import { BoardData } from '../config/types';
 
 export interface MyDB extends DBSchema {
     boards: {

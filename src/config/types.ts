@@ -41,6 +41,11 @@ export type TInterfaceContext = {
     boards: {
         boardsList: BoardNameAndId[] | "loading",
         setBoardsList: (value: SetStateAction<BoardNameAndId[] | "loading">) => void
+    },
+
+    user: {
+        userName: string,
+        setUserName: (value: SetStateAction<string>) => void
     }
 };
 

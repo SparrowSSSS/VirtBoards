@@ -1,12 +1,13 @@
 import { Button, ButtonGroup, Checkbox, Separator, Header } from '@vkontakte/vkui';
 import { FC, useContext, useState } from 'react'
 import { dbContext } from '../../../../App';
-import { updateBoardData } from '../../../../services/indexedDBServices';
+import { updateBoardData as idbUpdateBoardData  } from '../../../../services/indexedDBServices';
 import { TBoardContext, TSettings } from '../../../../config/types';
 import { boardContext } from '../../Board';
 import { IDBPDatabase } from "idb";
 import { MyDB } from '../../../../hooks/useDB';
 import getErrorMessage from '../../../../utils/alertError';
+import errorsPS from '../../../../config/errorsPS';
 
 
 export const SettingModal: FC = () => {
@@ -28,7 +29,7 @@ export const SettingModal: FC = () => {
             const newBoardData = {...boardData, settings: options};
             setBoardData(newBoardData);
             setFirstOptions(options);
-            updateBoardData(db, newBoardData).catch(error => alert(getErrorMessage(error, "Не удалось обновить данные доски")));
+            idbUpdateBoardData(db, newBoardData).catch(error => alert(getErrorMessage(error, errorsPS.updateBoardData)));
         };
     };
 

@@ -7,15 +7,6 @@
     background-position: 50% 50%;
 }
 
-.boardWindowFullScreen {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: calc(100vh - 15px);
-    z-index: 1000;
-}
-
 .boardCanvas {
     background: #EBEDF0;
     position: relative;

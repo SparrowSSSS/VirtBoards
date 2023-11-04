@@ -16,6 +16,7 @@ const Panels = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [popout, setPopout] = useState<ReactNode | null>(null);
   const [boardsList, setBoardsList] = useState<BoardNameAndId[] | "loading">("loading");
+  const [userName, setUserName] = useState("");
 
   const valueInterfaceContext: TInterfaceContext = {
     panels: {
@@ -36,6 +37,11 @@ const Panels = () => {
     boards: {
       boardsList,
       setBoardsList
+    },
+
+    user: {
+      userName,
+      setUserName
     }
   };
 

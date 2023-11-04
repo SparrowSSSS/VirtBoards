@@ -1,14 +1,30 @@
-import { FC, useContext } from 'react';
+import { FC, useContext, useEffect } from 'react';
 import { BoardData, TBoardContext } from '../../../config/types';
 import { Icon24Fullscreen, Icon24FullscreenExit } from '@vkontakte/icons';
 import styles from "./BoardBottomPanel.module.css"
 import { Icon24Settings } from '@vkontakte/icons';
 import { boardContext } from '../Board';
 import SettingModal from '../board-modals/setting-modal/SettingModal';
+import boardStyles from '../Board.module.css';
 
 const BoardBottomPanel: FC = () => {
 
     const { fullScreenBoard, setFullScreenBoard, boardData, setBoardModal } = useContext(boardContext) as TBoardContext;
+
+    const boardWindow = document.querySelector(`.${boardStyles.boardWindow}`) as HTMLElement;
+
+    document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) setFullScreenBoard(false);
+        else setFullScreenBoard(true);
+    });
+
+    const onFullScreenButton = () => {
+        boardWindow.requestFullscreen();
+    };
+
+    const offFullScreenButton = () => {
+        document.exitFullscreen();
+    };
 
     return (
         <>
@@ -16,7 +32,7 @@ const BoardBottomPanel: FC = () => {
                 ? (
                     <div className={styles.boardBottomPanel}>
                         <div className={styles.bottomPanelButton}>
-                            <Icon24Fullscreen className={styles.boardIcon} onClick={() => setFullScreenBoard(true)} />
+                            <Icon24Fullscreen className={styles.boardIcon} onClick={() => onFullScreenButton()} />
                         </div>
                     </div>
                 )
@@ -27,7 +43,7 @@ const BoardBottomPanel: FC = () => {
                             <div className={styles.bottomPanelButton} style={{marginRight: "15px"}} onClick={() => setBoardModal(<SettingModal />)}>
                                 <Icon24Settings className={`${styles.boardIcon}`}></Icon24Settings>
                             </div>
-                            <div onClick={() => setFullScreenBoard(false)} className={styles.bottomPanelButton} >
+                            <div onClick={() => offFullScreenButton()} className={styles.bottomPanelButton} >
                                 <Icon24FullscreenExit className={styles.boardIcon} />
                             </div>
                         </div>
