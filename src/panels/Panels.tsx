@@ -5,7 +5,7 @@ import BoardPanel from "./BoardPanel";
 import panels from "../config/panels";
 import Modals from "../modals/Modals";
 import localStorages from "../config/localStorages";
-import { BoardNameAndId, TInterfaceContext } from "../config/types";
+import { BoardNameAndId, TInterfaceContext, TModal } from "../config/types";
 import Documentation from "./Documentation";
 
 export const interfaceContext = createContext<TInterfaceContext | undefined>(undefined);
@@ -13,7 +13,7 @@ export const interfaceContext = createContext<TInterfaceContext | undefined>(und
 const Panels = () => {
 
   const [activePanel, setActivePanel] = useState(localStorage.getItem(localStorages.activePanel) || panels.home);
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<TModal | null>(null);
   const [popout, setPopout] = useState<ReactNode | null>(null);
   const [boardsList, setBoardsList] = useState<BoardNameAndId[] | "loading">("loading");
   const [userName, setUserName] = useState("");

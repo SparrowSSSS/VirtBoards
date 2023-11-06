@@ -1,14 +1,12 @@
-import { BoardData, BoardNameAndId } from "../config/types";
+import { BoardData } from "../config/types";
 import { IDBPDatabase } from "idb";
 import { MyDB } from "../hooks/useDB";
 import * as indexedDB from "./indexedDBServices";
 import * as vkBridge from "./bridgeServices";
 
-export const addBoard = async (board: BoardNameAndId, db: IDBPDatabase<MyDB>) => {
+export const addBoard = async (board: BoardData, db: IDBPDatabase<MyDB>) => {
     try {
-        const b = { ...board, settings: { grid: true }, components: [] };
-
-        await Promise.all([vkBridge.addBoard(b), indexedDB.addBoard(db, b)]);
+        await Promise.all([vkBridge.addBoard(board), indexedDB.addBoard(db, board)]);
     } catch (e) {
         throw e;
     };
@@ -37,5 +35,13 @@ export const getBoardData = async (boardId: number, db: IDBPDatabase<MyDB>): Pro
         } catch (error2) {
             throw new Error(`${error1}; ${error2}`);
         };
+    };
+};
+
+export const renameBoard = async (boardId: number, db: IDBPDatabase<MyDB>, boardName: string) => {
+    try {
+        await Promise.all([vkBridge.renameBoard(boardId, boardName), indexedDB.renameBoard(db, boardId, boardName)]);
+    } catch(e) {
+        throw e;
     };
 };

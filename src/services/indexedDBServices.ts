@@ -9,7 +9,7 @@ export const updateBoardData = async (db: IDBPDatabase<MyDB>, boardData: BoardDa
 
     try {
         await boards.put(boardData);
-    } catch(e) {
+    } catch (e) {
         throw e;
     };
 };
@@ -20,12 +20,12 @@ export const getBoardData = async (db: IDBPDatabase<MyDB>, boardId: number): Pro
     const boards = transaction.objectStore("boards");
 
     try {
-        const boardData = await boards.get(boardId) as BoardData;
+        const boardData = await boards.get(boardId);
 
         if (!boardData) throw new Error("Данные в локальном хранилище отсутствуют");
-        
+
         return boardData;
-    } catch(e) {
+    } catch (e) {
         throw e;
     };
 };
@@ -37,7 +37,7 @@ export const deleteBoard = async (db: IDBPDatabase<MyDB>, boardId: number) => {
 
     try {
         await boards.delete(boardId);
-    } catch(e) {
+    } catch (e) {
         throw e;
     };
 };
@@ -49,6 +49,24 @@ export const addBoard = async (db: IDBPDatabase<MyDB>, board: BoardData) => {
 
     try {
         await boards.put(board);
+    } catch (e) {
+        throw e;
+    };
+};
+
+export const renameBoard = async (db: IDBPDatabase<MyDB>, boardId: number, newBoardName: string) => {
+    const transaction = db.transaction("boards", "readonly");
+
+    const boards = transaction.objectStore("boards");
+
+    try {
+        const boardData = await boards.get(boardId);
+
+        if (boardData) {
+            boardData.name = newBoardName;
+
+            await updateBoardData(db, boardData);
+        };
     } catch (e) {
         throw e;
     };

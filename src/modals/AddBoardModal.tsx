@@ -6,61 +6,54 @@ import { interfaceContext } from "../panels/Panels";
 import { BoardNameAndId, TInterfaceContext } from "../config/types";
 import getErrorMessage from "../utils/alertError";
 import errorsPS from "../config/errorsPS";
+import checkOrigin from "../utils/checkOrigin";
+import validateBoardName from "../utils/validateBoardName";
 
 const AddBoardModal: FC = () => {
 
     const [boardName, setBoardName] = useState("");
-    const [validBoardName, setValidBoardName] = useState("")
+
+    const [error, setError] = useState<{ isError: boolean, message: string }>({isError: false, message: ""});
 
     const { modals: { setActiveModal }, boards: { boardsList, setBoardsList } } = useContext(interfaceContext) as TInterfaceContext;
 
     const db = useContext(dbContext);
 
-    const checkBoardNameOrigin = (): boolean => {
-        let checkBoardName: boolean = true;
+    const handleAddBoard = async () => {
+        const vBoardName = validateBoardName(boardName);
 
-        for (let board of boardsList) {
-            if ((board as BoardNameAndId).name === boardName) {
-                checkBoardName = false;
-                break;
+        if (!vBoardName) setError({isError: true, message: "Это обязательное поле"});
+        else if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({isError: true, message: "Доска с подобным именем уже существует"});
+        else if (boardsList !== "loading" && db && !error.isError) {
+            const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
+
+            try {
+                await addBoard(board, db);
+            } catch (e) {
+                alert(getErrorMessage(e, errorsPS.addBoard));
+                return;
             };
-        };
 
-        return checkBoardName;
+            setBoardsList([...(boardsList as BoardNameAndId[]), board]);
+            setActiveModal(null);
+        };
     };
 
-    const handleAddBoard = async () => {
-        if (boardsList !== "loading") {
-            if (!boardName) {
-                setValidBoardName("Это обязательноe поле");
-            } else if (!checkBoardNameOrigin()) {
-                setValidBoardName("У вас уже есть доска с таким названием");
-            } else if (db) {
-                const board = { name: boardName, id: Date.now() };
-
-                try {
-                    await addBoard(board, db);
-                } catch (e) {
-                    alert(getErrorMessage(e, errorsPS.addBoard));
-                    return;
-                };
-
-                setBoardsList([...(boardsList as BoardNameAndId[]), board]);
-                setActiveModal(null);
-            };
-        };
+    const changeBoardName = (newBoardName: string) => {
+        if (error.isError) setError({isError: false, message: ""});
+        setBoardName(newBoardName);
     };
 
     return (
         <Group>
             <FormLayout>
-                <FormItem htmlFor="board-name" top="Название доски" status={!validBoardName || boardName ? "default" : "error"} bottom={validBoardName && !boardName ? validBoardName : ""}>
+                <FormItem htmlFor="board-name" top="Название доски" status={error.isError ? "error" : "default"} bottom={error.message}>
                     <Input
                         id="board-name"
                         type="text"
                         name="board-name"
                         value={boardName}
-                        onChange={(e) => setBoardName(e.target.value)}
+                        onChange={(e) => changeBoardName(e.target.value)}
                         placeholder="Введите название для новой доски"
                         maxLength={30}
                     />

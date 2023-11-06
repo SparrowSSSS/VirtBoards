@@ -22,6 +22,11 @@ export type BoardData = {
 
 export type onClickRemoveBoard = (i: number) => void;
 
+export type TModal = {
+    id: string,
+    modal: ReactNode
+}
+
 export type TInterfaceContext = {
     panels: {
         activePanel: string,
@@ -29,8 +34,8 @@ export type TInterfaceContext = {
     },
 
     modals: {
-        activeModal: string | null,
-        setActiveModal: (value: SetStateAction<string | null>) => void
+        activeModal: TModal | null,
+        setActiveModal: (value: SetStateAction<TModal | null>) => void
     },
 
     popouts: {

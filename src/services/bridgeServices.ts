@@ -16,7 +16,7 @@ export const getUserName = async (): Promise<string> => {
 
 export const getBoardsList = async (): Promise<BoardNameAndId[]> => {
     try {
-        const { keys } = await bridge.send('VKWebAppStorageGetKeys', {count: 6, offset: 0});
+        const { keys } = await bridge.send('VKWebAppStorageGetKeys', { count: 6, offset: 0 });
 
         const boardNameKeys = parseStorageKey(keys, bridgeStoragesPS.boardNames);
 
@@ -56,7 +56,7 @@ export const deleteBoard = async (boardId: number) => {
 
 export const getBoardData = async (boardId: number): Promise<BoardData> => {
     try {
-        const {keys} = await bridge.send('VKWebAppStorageGet', { keys: [`${bridgeStoragesPS.boards}-${boardId}`] });
+        const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [`${bridgeStoragesPS.boards}-${boardId}`] });
 
         if (keys.length) {
             return JSON.parse(keys[0].value);
@@ -71,6 +71,24 @@ export const getBoardData = async (boardId: number): Promise<BoardData> => {
 export const updateBoardData = async (boardId: number, boardData: BoardData) => {
     try {
         await bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${boardId}`, value: JSON.stringify(boardData) });
+    } catch (e) {
+        throw e;
+    };
+};
+
+export const renameBoard = async (boardId: number, newBoardName: string) => {
+    try {
+        const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [`${bridgeStoragesPS.boards}-${boardId}`] });
+        const data = keys[0];
+        const boardData = JSON.parse(data.value) as BoardData;
+        boardData.name = newBoardName;
+
+        await Promise.all(
+            [
+                updateBoardData(boardId, boardData),
+                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}-${boardId}`, value: newBoardName })
+            ]
+        );
     } catch (e) {
         throw e;
     };
