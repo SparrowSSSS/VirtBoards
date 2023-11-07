@@ -1,20 +1,14 @@
 import { Button, ButtonGroup, Checkbox, Separator, Header } from '@vkontakte/vkui';
 import { FC, useContext, useState } from 'react'
-import { dbContext } from '../../../../App';
-import { updateBoardData as idbUpdateBoardData  } from '../../../../services/indexedDBServices';
 import { TBoardContext, TSettings } from '../../../../config/types';
 import { boardContext } from '../../Board';
-import { IDBPDatabase } from "idb";
-import { MyDB } from '../../../../hooks/useDB';
-import getErrorMessage from '../../../../utils/alertError';
-import errorsPS from '../../../../config/errorsPS';
+import getErrorMessage from '../../../../utils/getErrorMessage';
+import IndexedDB from '../../../../services/indexedService';
 
 
 export const SettingModal: FC = () => {
 
     const { boardData, setBoardData } = useContext(boardContext) as TBoardContext;
-
-    const db = useContext(dbContext) as IDBPDatabase<MyDB>;
 
     const [firstOptions, setFirstOptions] = useState<TSettings>({ ...boardData?.settings });
     const [options, setOptions] = useState<TSettings>(firstOptions);
@@ -29,7 +23,7 @@ export const SettingModal: FC = () => {
             const newBoardData = {...boardData, settings: options};
             setBoardData(newBoardData);
             setFirstOptions(options);
-            idbUpdateBoardData(db, newBoardData).catch(error => alert(getErrorMessage(error, errorsPS.updateBoardData)));
+            IndexedDB.updateBoardData(newBoardData).catch(error => alert(getErrorMessage(error)));
         };
     };
 

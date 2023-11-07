@@ -4,12 +4,12 @@ import panels from "../config/panels";
 import localStorages from "../config/localStorages";
 import { interfaceContext } from "./Panels";
 import { BoardData, TInterfaceContext } from "../config/types";
-import { dbContext } from "../App";
-import { getBoardData } from "../services/generalServices";
 import Board from "../components/board/Board";
-import getErrorMessage from "../utils/alertError";
+import getErrorMessage from "../utils/getErrorMessage";
 import errorsPS from "../config/errorsPS";
-import { updateBoardData as bridgeUpdateBoardData } from "../services/bridgeServices";
+import GeneralServices from "../services/generalServices";
+import BridgeStorage from "../services/bridgeServices";
+import ErrorPopout from "../popouts/ErrorPopout";
 
 interface Props {
   id: string
@@ -22,9 +22,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
 
   const [fullScreenBoard, setFullScreenBoard] = useState(false);
 
-  const { panels: { setActivePanel } } = useContext(interfaceContext) as TInterfaceContext;
-
-  const db = useContext(dbContext);
+  const { panels: { setActivePanel }, popouts: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
 
   const boardId = Number(localStorage.getItem(localStorages.activeBoard));
 
@@ -36,15 +34,13 @@ const BoardPanel: FC<Props> = ({ id }) => {
   const platform = usePlatform();
 
   useEffect(() => {
-    if (db) {
-      getBoardData(boardId, db).then(boardData => setBoardData(boardData), error => alert(getErrorMessage(error, errorsPS.getBoardData)));
-    };
-  }, [boardId, db]);
+    GeneralServices.getBoardData(boardId).then(boardData => setBoardData(boardData), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />));
+  }, [boardId]);
 
   useEffect(() => {
     if (boardData) {
       const interval = setInterval(() => {
-        bridgeUpdateBoardData((boardData as BoardData).id, boardData as BoardData).catch(e => alert(e));
+        BridgeStorage.updateBoardData((boardData as BoardData).id, boardData as BoardData).catch(e => alert(e));
       }, 10000);
 
       if (updateDataInterval) clearInterval(updateDataInterval)
@@ -61,7 +57,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
         {!boardData ? "Доска" : boardData.name}
       </PanelHeader>
       <Group>
-        {!boardData ? (<Spinner size="large"></Spinner>) : (<Board setBoardData={setBoardData} setFullScreenBoard={setFullScreenBoard} boardData={boardData} fullScreenBoard={fullScreenBoard} />)}
+        {!boardData ? (<Spinner size="large" style={{ paddingBottom: "20px" }}></Spinner>) : (<Board setBoardData={setBoardData} setFullScreenBoard={setFullScreenBoard} boardData={boardData} fullScreenBoard={fullScreenBoard} />)}
         <Separator />
         <Div style={{ textAlign: "center" }}>Чтобы воспользоваться полным функционалом виртуальной доски, разверните её на весь экран</Div>
       </Group>

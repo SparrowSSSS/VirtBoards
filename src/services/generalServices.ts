@@ -1,47 +1,53 @@
 import { BoardData } from "../config/types";
-import { IDBPDatabase } from "idb";
-import { MyDB } from "../hooks/useDB";
-import * as indexedDB from "./indexedDBServices";
-import * as vkBridge from "./bridgeServices";
+import IndexedDB from "./indexedService";
+import BridgeStorage from "./bridgeServices";
 
-export const addBoard = async (board: BoardData, db: IDBPDatabase<MyDB>) => {
-    try {
-        await Promise.all([vkBridge.addBoard(board), indexedDB.addBoard(db, board)]);
-    } catch (e) {
-        throw e;
+class GeneralServices {
+    static getBoardsList = async () => {
+
     };
-};
 
-export const deleteBoard = async (boardId: number, db: IDBPDatabase<MyDB>) => {
-    try {
-        await Promise.all([vkBridge.deleteBoard(boardId), indexedDB.deleteBoard(db, boardId)]);
-    } catch (e) {
-        throw e;
-    };
-};
-
-export const getBoardData = async (boardId: number, db: IDBPDatabase<MyDB>): Promise<BoardData> => {
-    try {
-        const idbData = await indexedDB.getBoardData(db, boardId);
-
-        return idbData;
-    } catch(error1) {
+    static addBoard = async (board: BoardData) => {
         try {
-            const bridgeData = await vkBridge.getBoardData(boardId);
+            await Promise.all([BridgeStorage.addBoard(board), IndexedDB.addBoard(board)]);
+        } catch (e) {
+            throw e;
+        };
+    }
 
-            await indexedDB.addBoard(db, bridgeData);
+    static deleteBoard = async (boardId: number) => {
+        try {
+            await Promise.all([BridgeStorage.deleteBoard(boardId), IndexedDB.deleteBoard(boardId)]);
+        } catch (e) {
+            throw e;
+        };
+    }
 
-            return bridgeData;
-        } catch (error2) {
-            throw new Error(`${error1}; ${error2}`);
+    static getBoardData = async (boardId: number): Promise<BoardData> => {
+        try {
+            const idbData = await IndexedDB.getBoardData(boardId);
+    
+            return idbData;
+        } catch(error1) {
+            try {
+                const bridgeData = await BridgeStorage.getBoardData(boardId);
+    
+                await IndexedDB.addBoard(bridgeData);
+    
+                return bridgeData;
+            } catch (error2) {
+                throw new Error(`${error1}; ${error2}`);
+            };
+        };
+    }
+
+    static renameBoard = async (boardId: number, boardName: string) => {
+        try {
+            await Promise.all([BridgeStorage.renameBoard(boardId, boardName), IndexedDB.renameBoard(boardId, boardName)]);
+        } catch(e) {
+            throw e;
         };
     };
 };
 
-export const renameBoard = async (boardId: number, db: IDBPDatabase<MyDB>, boardName: string) => {
-    try {
-        await Promise.all([vkBridge.renameBoard(boardId, boardName), indexedDB.renameBoard(db, boardId, boardName)]);
-    } catch(e) {
-        throw e;
-    };
-};
+export default GeneralServices;

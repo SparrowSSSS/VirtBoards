@@ -1,46 +1,49 @@
 import { Button, FormItem, FormLayout, Group, Input } from "@vkontakte/vkui";
 import { FC, useContext, useState } from "react";
-import { addBoard } from "../services/generalServices";
-import { dbContext } from "../App";
 import { interfaceContext } from "../panels/Panels";
 import { BoardNameAndId, TInterfaceContext } from "../config/types";
-import getErrorMessage from "../utils/alertError";
+import getErrorMessage from "../utils/getErrorMessage";
 import errorsPS from "../config/errorsPS";
 import checkOrigin from "../utils/checkOrigin";
 import validateBoardName from "../utils/validateBoardName";
+import GeneralServices from "../services/generalServices";
+import ErrorPopout from "../popouts/ErrorPopout";
 
 const AddBoardModal: FC = () => {
 
     const [boardName, setBoardName] = useState("");
 
-    const [error, setError] = useState<{ isError: boolean, message: string }>({isError: false, message: ""});
+    const [error, setError] = useState<{ isError: boolean, message: string }>({ isError: false, message: "" });
 
-    const { modals: { setActiveModal }, boards: { boardsList, setBoardsList } } = useContext(interfaceContext) as TInterfaceContext;
-
-    const db = useContext(dbContext);
+    const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, popouts: { setPopout }, loading: { setIsLoading } } = useContext(interfaceContext) as TInterfaceContext;
 
     const handleAddBoard = async () => {
+
         const vBoardName = validateBoardName(boardName);
 
-        if (!vBoardName) setError({isError: true, message: "Это обязательное поле"});
-        else if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({isError: true, message: "Доска с подобным именем уже существует"});
-        else if (boardsList !== "loading" && db && !error.isError) {
+        if (!vBoardName) setError({ isError: true, message: "Это обязательное поле" });
+        else if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({ isError: true, message: "Доска с подобным именем уже существует" });
+        else if (boardsList !== "loading" && !error.isError) {
+            setActiveModal(null);
+            setIsLoading(true);
+
             const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
 
             try {
-                await addBoard(board, db);
+                await GeneralServices.addBoard(board);
+
+                setBoardsList([...(boardsList as BoardNameAndId[]), board]);
+                setIsLoading(false);
             } catch (e) {
-                alert(getErrorMessage(e, errorsPS.addBoard));
+                setIsLoading(false);
+                setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.addBoard} />);
                 return;
             };
-
-            setBoardsList([...(boardsList as BoardNameAndId[]), board]);
-            setActiveModal(null);
         };
     };
 
     const changeBoardName = (newBoardName: string) => {
-        if (error.isError) setError({isError: false, message: ""});
+        if (error.isError) setError({ isError: false, message: "" });
         setBoardName(newBoardName);
     };
 

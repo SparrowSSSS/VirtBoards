@@ -6,43 +6,57 @@ import { interfaceContext } from '../panels/Panels';
 import { modals } from '../modals/Modals';
 import BoardsListComponent from './board-list-component/BoardsListComponent';
 import AddBoardModal from '../modals/AddBoardModal';
-import { Icon24Download } from '@vkontakte/icons';
-import getErrorMessage from '../utils/alertError';
+import { Icon24Document } from '@vkontakte/icons';
+import getErrorMessage from '../utils/getErrorMessage';
 import errorsPS from '../config/errorsPS';
-import { addBoard } from '../services/generalServices';
-import { dbContext } from '../App';
-import { MyDB } from '../hooks/useDB';
-import { IDBPDatabase } from "idb";
 import checkOrigin from '../utils/checkOrigin';
+import GeneralServices from '../services/generalServices';
+import ErrorPopout from '../popouts/ErrorPopout';
+import BoardLimitSnackbar from '../snackbars/BoardLimitSnackbar';
+import BridgeStorage from '../services/bridgeServices';
 
 export const BoardsList: FC = () => {
 
-    const { modals: { setActiveModal }, boards: { boardsList, setBoardsList } } = useContext(interfaceContext) as TInterfaceContext;
+    const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, popouts: { setPopout }, snackbars: { setSnackbar }, loading: { setIsLoading } } = useContext(interfaceContext) as TInterfaceContext;
 
-    const db = useContext(dbContext);
-
-    const handleAddBoardButtonClick = () => {
+    const handleAddBoardButtonClick = async () => {
         if (boardsList !== "loading") {
-            if (boardsList.length < 3) {
-                setActiveModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });
-            } else {
-                alert("Максимальное количество доступных досок - 3");
+            setIsLoading(true);
+
+            try {
+
+                const boards = await BridgeStorage.getBoardsList();
+
+                if (boards.length < 3) {
+                    setActiveModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });
+                } else {
+                    setSnackbar(<BoardLimitSnackbar subtitle="Максимальное количество доступных досок - 3" />);
+                };
+
+                setIsLoading(false);
+            } catch (e) {
+                setIsLoading(false);
+                setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.addBoard} />);
             };
         };
     };
 
     const loadBoard = async (boardData: BoardData) => {
         try {
-            await addBoard(boardData, db as IDBPDatabase<MyDB>);
+            await GeneralServices.addBoard(boardData);
         } catch (e) {
             throw e;
         };
     };
 
-    const downloadBoard = (e: ChangeEvent<HTMLInputElement>) => {
-        if (db && boardsList !== "loading") {
-            if (boardsList.length < 3) {
-                try {
+    const downloadBoard = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (boardsList !== "loading") {
+            setIsLoading(true);
+
+            try {
+                const bl = await BridgeStorage.getBoardsList();
+
+                if (bl.length < 3) {
                     if (e.target.files && e.target.files.length > 0) {
                         const file = e.target.files[0];
 
@@ -52,41 +66,52 @@ export const BoardsList: FC = () => {
 
                         reader.onload = async () => {
                             if (reader.result) {
-
-                                const board = { ...JSON.parse(reader.result as string), id: Date.now() } as BoardData;
-
-                                if (!checkOrigin(board.name, boardsList)) {
-                                    board.name = board.name + "(1)";
-                                    let n = 1;
-                                    while (!checkOrigin(board.name, boardsList)) {
-                                        board.name.replace(new RegExp(`(${n})`), `(${n + 1})`);
-                                        n += 1;
-                                    };
-                                };
+                                let board: BoardData;
 
                                 try {
-                                    await loadBoard(board);
-                                } catch (e) {
-                                    throw e;
-                                };
+                                    board = { ...JSON.parse(reader.result as string), id: Date.now() } as BoardData;
 
-                                setBoardsList([...boardsList, board]);
+                                    if (!checkOrigin(board.name, boardsList)) {
+                                        board.name = board.name + "(1)";
+                                        let n = 1;
+                                        while (!checkOrigin(board.name, boardsList)) {
+                                            board.name.replace(new RegExp(`(${n})`), `(${n + 1})`);
+                                            n += 1;
+                                        };
+                                    };
+
+                                    await loadBoard(board);
+
+                                    setIsLoading(false);
+                                    setBoardsList([...boardsList, board]);
+                                } catch (e) {
+                                    setIsLoading(false);
+                                    setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.dBoard} />);
+                                    return;
+                                };
                             } else {
-                                throw new Error();
+                                setIsLoading(false);
+                                setPopout(<ErrorPopout message="" errorPS={errorsPS.dBoard} />);
+                                return;
                             };
                         };
 
                         reader.onerror = () => {
-                            throw reader.error;
+                            setIsLoading(false);
+                            setPopout(<ErrorPopout message={getErrorMessage(reader.error)} errorPS={errorsPS.dBoard} />);
+                            return;
                         };
                     } else {
                         throw new Error();
                     };
-                } catch (e) {
-                    alert(getErrorMessage(e, errorsPS.dBoard));
+
+                } else {
+                    setIsLoading(false);
+                    setSnackbar(<BoardLimitSnackbar subtitle="Максимальное количество доступных досок - 3" />);
                 };
-            } else {
-                alert("Максимальное количество доступных досок - 3");
+            } catch (e) {
+                setIsLoading(false);
+                setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.dBoard} />);
             };
         };
     };
@@ -95,7 +120,7 @@ export const BoardsList: FC = () => {
         <>
             <Group header={<Header mode="primary">Доски</Header>}>
                 {
-                    boardsList === "loading" ? (<Spinner size="medium"></Spinner>)
+                    boardsList === "loading" ? (<Spinner size="medium" style={{ paddingBottom: "20px" }}></Spinner>)
 
                         : boardsList.length > 0
                             ? (
@@ -109,9 +134,9 @@ export const BoardsList: FC = () => {
 
                 }
             </Group>
-            <ButtonGroup mode="horizontal" gap="m">
+            <ButtonGroup mode="horizontal" gap="m" style={{ margin: "15px" }}>
                 <Button size="m" before={<Icon24Add />} onClick={() => handleAddBoardButtonClick()}>Создать доску</Button>
-                <File before={<Icon24Download />} size="m" onChange={e => downloadBoard(e)}>
+                <File before={<Icon24Document />} size="m" onChange={e => downloadBoard(e)}>
                     Загрузить доску
                 </File>
             </ButtonGroup>

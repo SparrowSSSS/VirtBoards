@@ -1,4 +1,4 @@
-import ReactDOM, { render } from "react-dom";
+import ReactDOM from "react-dom";
 import bridge from "@vkontakte/vk-bridge";
 import App from "./App";
 

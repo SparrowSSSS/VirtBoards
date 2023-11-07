@@ -51,6 +51,16 @@ export type TInterfaceContext = {
     user: {
         userName: string,
         setUserName: (value: SetStateAction<string>) => void
+    },
+
+    snackbars: {
+        snackbar: ReactNode | null,
+        setSnackbar: (value: SetStateAction<ReactNode | null>) => void
+    },
+
+    loading: {
+        isLoading: boolean,
+        setIsLoading: (value: SetStateAction<boolean>) => void
     }
 };
 

@@ -1,15 +1,14 @@
 import { Avatar, Group, Link, Panel, PanelHeader, Placeholder, Separator } from "@vkontakte/vkui";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect } from "react";
 import { TInterfaceContext } from "../config/types";
 import BoardsList from "../components/BoardsList";
-import { dbContext } from "../App";
-import { getBoardsList } from "../services/bridgeServices";
 import { interfaceContext } from "./Panels";
 import panels from "../config/panels";
 import localStorages from "../config/localStorages";
-import { getUserName } from "../services/bridgeServices";
-import getErrorMessage from "../utils/alertError";
+import getErrorMessage from "../utils/getErrorMessage";
 import errorsPS from "../config/errorsPS";
+import BridgeStorage from "../services/bridgeServices";
+import ErrorPopout from "../popouts/ErrorPopout";
 
 interface Props {
   id: string
@@ -17,9 +16,7 @@ interface Props {
 
 const Home: FC<Props> = ({ id }) => {
 
-  const { boards: { setBoardsList }, panels: { setActivePanel }, user: {setUserName, userName} } = useContext(interfaceContext) as TInterfaceContext;
-
-  const db = useContext(dbContext);
+  const { boards: { setBoardsList }, panels: { setActivePanel }, user: {setUserName, userName}, popouts: {setPopout} } = useContext(interfaceContext) as TInterfaceContext;
 
   const go = (nextPanel: string) => {
     localStorage.setItem(localStorages.activePanel, nextPanel);
@@ -27,13 +24,8 @@ const Home: FC<Props> = ({ id }) => {
   };
 
   useEffect(() => {
-    if (db) {
-      getBoardsList().then(boardsList => setBoardsList(boardsList), error => alert(getErrorMessage(error, errorsPS.getBoardsList)));
-    };
-  }, [db]);
-
-  useEffect(() => {
-    getUserName().then(name => setUserName(name), error => alert(getErrorMessage(error, errorsPS.getUserName)));
+    BridgeStorage.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
+    BridgeStorage.getUserName().then(name => setUserName(name), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getUserName} />));
   }, []);
 
 return (

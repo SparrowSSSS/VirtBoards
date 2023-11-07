@@ -7,6 +7,7 @@ import Modals from "../modals/Modals";
 import localStorages from "../config/localStorages";
 import { BoardNameAndId, TInterfaceContext, TModal } from "../config/types";
 import Documentation from "./Documentation";
+import styles from "./Panels.module.css"
 
 export const interfaceContext = createContext<TInterfaceContext | undefined>(undefined);
 
@@ -16,6 +17,8 @@ const Panels = () => {
   const [activeModal, setActiveModal] = useState<TModal | null>(null);
   const [popout, setPopout] = useState<ReactNode | null>(null);
   const [boardsList, setBoardsList] = useState<BoardNameAndId[] | "loading">("loading");
+  const [snackbar, setSnackbar] = useState<ReactNode | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
 
   const valueInterfaceContext: TInterfaceContext = {
@@ -42,11 +45,22 @@ const Panels = () => {
     user: {
       userName,
       setUserName
+    },
+
+    snackbars: {
+      snackbar,
+      setSnackbar
+    },
+
+    loading: {
+      isLoading,
+      setIsLoading
     }
   };
 
   return (
     <interfaceContext.Provider value={valueInterfaceContext}>
+      {isLoading ? <div  className={styles.loadingOverlay} /> : null}
       <SplitLayout modal={<Modals />} popout={popout}>
         <SplitCol>
           <View activePanel={activePanel}>
@@ -55,6 +69,7 @@ const Panels = () => {
             <Documentation id={panels.documentation} />
           </View>
         </SplitCol>
+        {snackbar}
       </SplitLayout>
     </interfaceContext.Provider>
   )

@@ -1,13 +1,13 @@
 import { Button, FormItem, FormLayout, Group, Input } from '@vkontakte/vkui';
 import { FC, useContext, useState } from 'react';
-import { dbContext } from '../App';
 import errorsPS from '../config/errorsPS';
 import { BoardNameAndId, TInterfaceContext } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
-import { renameBoard } from '../services/generalServices';
-import getErrorMessage from '../utils/alertError';
+import GeneralServices from '../services/generalServices';
+import getErrorMessage from '../utils/getErrorMessage';
 import checkOrigin from '../utils/checkOrigin';
 import validateBoardName from '../utils/validateBoardName';
+import ErrorPopout from '../popouts/ErrorPopout';
 
 interface Props {
   boardId: number,
@@ -21,31 +21,33 @@ const RenameBoardModal: FC<Props> = ({ boardId, boardName, index }) => {
 
   const [error, setError] = useState<{ isError: boolean, message: string }>({ isError: false, message: "" });
 
-  const { modals: { setActiveModal }, boards: { boardsList, setBoardsList } } = useContext(interfaceContext) as TInterfaceContext;
-
-  const db = useContext(dbContext);
+  const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, popouts: { setPopout }, loading: {setIsLoading} } = useContext(interfaceContext) as TInterfaceContext;
 
   const handleRenameBoard = async () => {
     const vBoardName = validateBoardName(newBoardName);
 
     if (!vBoardName) setError({ isError: true, message: "Это обязательное поле" });
     else if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({ isError: true, message: "Доска с подобным именем уже существует" });
-    else if (boardsList !== "loading" && db && !error.isError) {
+    else if (boardsList !== "loading" && !error.isError) {
+      setIsLoading(true);
+
       try {
-        await renameBoard(boardId, db, vBoardName);
+        await GeneralServices.renameBoard(boardId, vBoardName);
+
+        const newBoardsList = [...boardsList];
+
+        newBoardsList.splice(index, 1);
+
+        newBoardsList.push({ id: boardId, name: vBoardName });
+
+        setIsLoading(false);
+        setBoardsList(newBoardsList);
+        setActiveModal(null);
       } catch (e) {
-        alert(getErrorMessage(e, errorsPS.renameBoard));
+        setIsLoading(false);
+        setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.renameBoard} />);
         return;
       };
-
-      const newBoardsList = [...boardsList];
-
-      newBoardsList.splice(index, 1);
-
-      newBoardsList.push({id: boardId, name: vBoardName});
-
-      setBoardsList(newBoardsList);
-      setActiveModal(null);
     };
   };
 

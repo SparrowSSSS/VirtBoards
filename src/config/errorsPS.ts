@@ -6,7 +6,8 @@ const errorsPS = {
     getUserName: "Не удалось получить имя пользователя",
     renameBoard: "Не удалось переименовать доску",
     downloadBoard: "Не удалось скачать доску",
-    dBoard: "Не удалось загрузить доску"
+    dBoard: "Не удалось загрузить доску",
+    deleteBoard: "Не удалось удалить доску"
 };
 
 export default errorsPS;
