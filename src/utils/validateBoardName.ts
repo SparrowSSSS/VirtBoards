@@ -6,8 +6,6 @@ const validateBoardName = (boardName: string): string => {
     for (let i of bList) {
         if (i) {
             list.push(i);
-        } else {
-            break;
         };
     };
 

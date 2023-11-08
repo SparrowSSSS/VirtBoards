@@ -13,6 +13,13 @@ export interface MyDB extends DBSchema {
         value: BoardNameAndId
     }
 
+};
+
+export class OpenDBError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OpenDBError"
+    }
 }
 
 const config = {
@@ -31,6 +38,18 @@ const createDB = async () => {
         const db = await openDB<MyDB>(config.dbName, config.dbVersion, {
             upgrade(db, oldVersion) {
                 config.dbUpgrade(db, oldVersion);
+            },
+
+            blocked() {
+                throw new OpenDBError("Не удаётся подключиться к локальной базе данных, рекомендуем закрыть все вкладки с приложением, кроме этой");
+            },
+
+            blocking() {
+                throw new OpenDBError("Рекомендуем закрыть текущую вкладку с приложением, так как она препятствует работе с локальной базой данных");
+            },
+
+            terminated() {
+                throw new OpenDBError("Неизвестная ошибка подключения к локальной базой данных");
             }
         });
 
@@ -58,7 +77,59 @@ class IndexedDB {
         } catch (e) {
             throw e;
         };
-    };
+    }
+
+    static cleardDB = async () => {
+        try {
+            const db = await createDB();
+
+            const transaction = db.transaction(["boardNames", "boards"], "readwrite");
+
+            const bn = transaction.objectStore("boardNames");
+            const b = transaction.objectStore("boards");
+
+            await Promise.all([bn.clear(), b.clear()]);
+        } catch (e) {
+            throw e;
+        };
+    }
+
+    static setBoardsList = async (boardsList: BoardNameAndId[]) => {
+        try {
+            const db = await createDB();
+
+            const transaction = db.transaction("boardNames", "readwrite");
+
+            const bn = transaction.objectStore("boardNames");
+
+            const list = [];
+
+            for (let i of boardsList) {
+                list.push(bn.add(i));
+            };
+
+            await Promise.all(list);
+        } catch (e) {
+            throw e;
+        };
+    }
+
+    static getBoardData = async (boardId: number): Promise<BoardData> => {
+        try {
+            const db = await createDB();
+
+            const transaction = db.transaction("boards", "readonly");
+
+            const boards = transaction.objectStore("boards");
+            const boardData = await boards.get(boardId);
+
+            if (!boardData) throw new Error("404");
+
+            return boardData;
+        } catch (e) {
+            throw e;
+        };
+    }
 
     static updateBoardData = async (boardData: BoardData) => {
         try {
@@ -74,32 +145,16 @@ class IndexedDB {
         };
     }
 
-    static getBoardData = async (boardId: number): Promise<BoardData> => {
-        try {
-            const db = await createDB();
-
-            const transaction = db.transaction("boards", "readonly");
-
-            const boards = transaction.objectStore("boards");
-            const boardData = await boards.get(boardId);
-
-            if (!boardData) throw new Error("Данные в локальном хранилище отсутствуют");
-
-            return boardData;
-        } catch (e) {
-            throw e;
-        };
-    }
-
     static deleteBoard = async (boardId: number) => {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction("boards", "readwrite");
+            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
 
             const boards = transaction.objectStore("boards");
+            const boardNames = transaction.objectStore("boardNames");
 
-            await boards.delete(boardId);
+            await Promise.all([boards.delete(boardId), boardNames.delete(boardId)]);
         } catch (e) {
             throw e;
         };
@@ -109,11 +164,12 @@ class IndexedDB {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction("boards", "readwrite");
+            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
 
             const boards = transaction.objectStore("boards");
+            const boardNames = transaction.objectStore("boardNames");
 
-            await boards.put(board);
+            await Promise.all([boards.add(board), boardNames.add({id: board.id, name: board.name})]);
         } catch (e) {
             throw e;
         };
@@ -123,17 +179,14 @@ class IndexedDB {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction("boards", "readonly");
+            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
 
             const boards = transaction.objectStore("boards");
+            const boardNames = transaction.objectStore("boardNames");
 
-            const boardData = await boards.get(boardId);
+            const boardData = await boards.get(boardId) as BoardData;
 
-            if (boardData) {
-                boardData.name = newBoardName;
-
-                await this.updateBoardData(boardData);
-            };
+            await Promise.all([boards.put({...boardData, name: newBoardName}), boardNames.put({name: newBoardName, id: boardId})]);
         } catch (e) {
             throw e;
         };

@@ -3,8 +3,8 @@
     background-color: white;
     height: 50px;
     width: 50px;
-    right: 10%;
-    bottom: 18%;
+    right: 12%;
+    bottom: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,6 +20,12 @@
     justify-content: space-between;
     box-sizing: border-box;
     padding: 10px;
+    position: fixed;
+}
+
+.boardBottomPanelFullScreenTl {
+    right: 3%;
+    bottom: 5%;
     position: fixed;
 }
 

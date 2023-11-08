@@ -19,8 +19,6 @@ class BridgeStorage {
         try {
             const { keys } = await bridge.send('VKWebAppStorageGetKeys', { count: 6, offset: 0 });
 
-            console.log(keys)
-
             const boardNameKeys = parseStorageKey(keys, bridgeStoragesPS.boardNames);
 
             if (boardNameKeys.length === 0) return [];

@@ -1,5 +1,5 @@
 import { Icon24Add } from '@vkontakte/icons';
-import { Button, ButtonGroup, File, Group, Header, List, Placeholder, Spinner } from '@vkontakte/vkui';
+import { Button, ButtonGroup, File, Group, Header, List, Placeholder, Platform, Spinner, usePlatform } from '@vkontakte/vkui';
 import { ChangeEvent, FC, useContext } from 'react';
 import { BoardData, TInterfaceContext } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
@@ -19,6 +19,8 @@ export const BoardsList: FC = () => {
 
     const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, popouts: { setPopout }, snackbars: { setSnackbar }, loading: { setIsLoading } } = useContext(interfaceContext) as TInterfaceContext;
 
+    const platform = usePlatform();
+
     const handleAddBoardButtonClick = async () => {
         if (boardsList !== "loading") {
             setIsLoading(true);
@@ -27,7 +29,7 @@ export const BoardsList: FC = () => {
 
                 const boards = await BridgeStorage.getBoardsList();
 
-                if (boards.length < 3) {
+                if (boards.length < 3 && boardsList.length < 3) {
                     setActiveModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });
                 } else {
                     setSnackbar(<BoardLimitSnackbar subtitle="Максимальное количество доступных досок - 3" />);
@@ -56,7 +58,7 @@ export const BoardsList: FC = () => {
             try {
                 const bl = await BridgeStorage.getBoardsList();
 
-                if (bl.length < 3) {
+                if (bl.length < 3 && boardsList.length < 3) {
                     if (e.target.files && e.target.files.length > 0) {
                         const file = e.target.files[0];
 
@@ -75,7 +77,7 @@ export const BoardsList: FC = () => {
                                         board.name = board.name + "(1)";
                                         let n = 1;
                                         while (!checkOrigin(board.name, boardsList)) {
-                                            board.name.replace(new RegExp(`(${n})`), `(${n + 1})`);
+                                            board.name = board.name.replace(new RegExp(`(${n})`), `${n + 1}`);
                                             n += 1;
                                         };
                                     };
@@ -134,9 +136,9 @@ export const BoardsList: FC = () => {
 
                 }
             </Group>
-            <ButtonGroup mode="horizontal" gap="m" style={{ margin: "15px" }}>
-                <Button size="m" before={<Icon24Add />} onClick={() => handleAddBoardButtonClick()}>Создать доску</Button>
-                <File before={<Icon24Document />} size="m" onChange={e => downloadBoard(e)}>
+            <ButtonGroup mode={platform === Platform.VKCOM ? "horizontal" : "vertical"} gap="m" style={{ margin: "15px" }}>
+                <Button size="m" before={<Icon24Add />} onClick={() => handleAddBoardButtonClick()} stretched={platform !== Platform.VKCOM}>Создать доску</Button>
+                <File before={<Icon24Document />} size="m" onChange={e => downloadBoard(e)} stretched={platform !== Platform.VKCOM} >
                     Загрузить доску
                 </File>
             </ButtonGroup>

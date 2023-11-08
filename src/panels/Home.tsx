@@ -9,6 +9,7 @@ import getErrorMessage from "../utils/getErrorMessage";
 import errorsPS from "../config/errorsPS";
 import BridgeStorage from "../services/bridgeServices";
 import ErrorPopout from "../popouts/ErrorPopout";
+import GeneralServices from "../services/generalServices";
 
 interface Props {
   id: string
@@ -24,7 +25,7 @@ const Home: FC<Props> = ({ id }) => {
   };
 
   useEffect(() => {
-    BridgeStorage.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
+    GeneralServices.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
     BridgeStorage.getUserName().then(name => setUserName(name), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getUserName} />));
   }, []);
 

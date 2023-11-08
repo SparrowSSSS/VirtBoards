@@ -8,6 +8,7 @@ import checkOrigin from "../utils/checkOrigin";
 import validateBoardName from "../utils/validateBoardName";
 import GeneralServices from "../services/generalServices";
 import ErrorPopout from "../popouts/ErrorPopout";
+import BridgeStorage from "../services/bridgeServices";
 
 const AddBoardModal: FC = () => {
 
@@ -18,27 +19,30 @@ const AddBoardModal: FC = () => {
     const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, popouts: { setPopout }, loading: { setIsLoading } } = useContext(interfaceContext) as TInterfaceContext;
 
     const handleAddBoard = async () => {
+        setIsLoading(true);
 
-        const vBoardName = validateBoardName(boardName);
+        try {
 
-        if (!vBoardName) setError({ isError: true, message: "Это обязательное поле" });
-        else if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({ isError: true, message: "Доска с подобным именем уже существует" });
-        else if (boardsList !== "loading" && !error.isError) {
-            setActiveModal(null);
-            setIsLoading(true);
+            const vBoardName = validateBoardName(boardName);
 
-            const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
+            const bridgeBoardsList = await BridgeStorage.getBoardsList();
 
-            try {
+            if (!vBoardName) setError({ isError: true, message: "Это обязательное поле" });
+            else if (!checkOrigin(vBoardName, bridgeBoardsList)) setError({ isError: true, message: "Доска с подобным именем уже существует" });
+            else if (boardsList !== "loading" && !error.isError) {
+                setActiveModal(null);
+
+                const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
                 await GeneralServices.addBoard(board);
 
                 setBoardsList([...(boardsList as BoardNameAndId[]), board]);
-                setIsLoading(false);
-            } catch (e) {
-                setIsLoading(false);
-                setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.addBoard} />);
-                return;
             };
+
+            setIsLoading(false);
+        } catch (e) {
+            setIsLoading(false);
+            setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.addBoard} />);
+            return;
         };
     };
 
