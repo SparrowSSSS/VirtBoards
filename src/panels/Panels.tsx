@@ -1,13 +1,15 @@
 import { SplitCol, SplitLayout, View } from "@vkontakte/vkui";
 import { useState, ReactNode, createContext } from "react";
-import Home from "./Home";
-import BoardPanel from "./BoardPanel";
 import panels from "../config/panels";
 import Modals from "../modals/Modals";
 import localStorages from "../config/localStorages";
 import { BoardNameAndId, TInterfaceContext, TModal } from "../config/types";
-import Documentation from "./Documentation";
 import styles from "./Panels.module.css"
+import ErrorPopout from "../popouts/ErrorPopout";
+import Home from "./home/Home";
+import Documentation from "./documentation/Documentation";
+import BoardPanel from "./board-panel/BoardPanel";
+import getErrorMessage from "../utils/getErrorMessage";
 
 export const interfaceContext = createContext<TInterfaceContext | undefined>(undefined);
 
@@ -20,6 +22,11 @@ const Panels = () => {
   const [snackbar, setSnackbar] = useState<ReactNode | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
+
+  const catchError = (error: any, ps: string) => {
+    setIsLoading(false);
+    setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={ps} />);
+  };
 
   const valueInterfaceContext: TInterfaceContext = {
     panels: {
@@ -55,12 +62,16 @@ const Panels = () => {
     loading: {
       isLoading,
       setIsLoading
+    },
+
+    func: {
+      catchError
     }
   };
 
   return (
     <interfaceContext.Provider value={valueInterfaceContext}>
-      {isLoading ? <div  className={styles.loadingOverlay} /> : null}
+      {isLoading ? <div className={styles.loadingOverlay} /> : null}
       <SplitLayout modal={<Modals />} popout={popout}>
         <SplitCol>
           <View activePanel={activePanel}>

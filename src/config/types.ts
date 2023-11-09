@@ -61,6 +61,10 @@ export type TInterfaceContext = {
     loading: {
         isLoading: boolean,
         setIsLoading: (value: SetStateAction<boolean>) => void
+    },
+
+    func: {
+        catchError: (error: any, ps: string) => void
     }
 };
 

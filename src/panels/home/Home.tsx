@@ -1,15 +1,15 @@
 import { Avatar, Group, Link, Panel, PanelHeader, Placeholder, Separator } from "@vkontakte/vkui";
 import { FC, useContext, useEffect } from "react";
-import { TInterfaceContext } from "../config/types";
-import BoardsList from "../components/BoardsList";
-import { interfaceContext } from "./Panels";
-import panels from "../config/panels";
-import localStorages from "../config/localStorages";
-import getErrorMessage from "../utils/getErrorMessage";
-import errorsPS from "../config/errorsPS";
-import BridgeStorage from "../services/bridgeServices";
-import ErrorPopout from "../popouts/ErrorPopout";
-import GeneralServices from "../services/generalServices";
+import { TInterfaceContext } from "../../config/types";
+import BoardsList from "../../components/board-list/BoardsList";
+import { interfaceContext } from "../Panels";
+import panels from "../../config/panels";
+import localStorages from "../../config/localStorages";
+import getErrorMessage from "../../utils/getErrorMessage";
+import errorsPS from "../../config/errorsPS";
+import BridgeStorage from "../../services/bridgeServices";
+import ErrorPopout from "../../popouts/ErrorPopout";
+import IndexedDB from "../../services/indexedService";
 
 interface Props {
   id: string
@@ -25,7 +25,7 @@ const Home: FC<Props> = ({ id }) => {
   };
 
   useEffect(() => {
-    GeneralServices.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
+    IndexedDB.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
     BridgeStorage.getUserName().then(name => setUserName(name), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getUserName} />));
   }, []);
 

@@ -1,15 +1,14 @@
 import { Div, Group, Panel, PanelHeader, PanelHeaderBack, Platform, Separator, Spinner, usePlatform } from "@vkontakte/vkui";
 import { FC, useContext, useEffect, useState } from "react";
-import panels from "../config/panels";
-import localStorages from "../config/localStorages";
-import { interfaceContext } from "./Panels";
-import { BoardData, TInterfaceContext } from "../config/types";
-import Board from "../components/board/Board";
-import getErrorMessage from "../utils/getErrorMessage";
-import errorsPS from "../config/errorsPS";
-import GeneralServices from "../services/generalServices";
-import BridgeStorage from "../services/bridgeServices";
-import ErrorPopout from "../popouts/ErrorPopout";
+import panels from "../../config/panels";
+import localStorages from "../../config/localStorages";
+import { interfaceContext } from "../Panels";
+import { BoardData, TInterfaceContext } from "../../config/types";
+import Board from "../../components/board/Board";
+import getErrorMessage from "../../utils/getErrorMessage";
+import errorsPS from "../../config/errorsPS";
+import ErrorPopout from "../../popouts/ErrorPopout";
+import IndexedDB from "../../services/indexedService";
 
 interface Props {
   id: string
@@ -18,7 +17,6 @@ interface Props {
 const BoardPanel: FC<Props> = ({ id }) => {
 
   const [boardData, setBoardData] = useState<BoardData>();
-  const [updateDataInterval, setUpdateDataInterval] = useState<NodeJS.Timer | null>();
 
   const [fullScreenBoard, setFullScreenBoard] = useState(false);
 
@@ -34,20 +32,8 @@ const BoardPanel: FC<Props> = ({ id }) => {
   const platform = usePlatform();
 
   useEffect(() => {
-    GeneralServices.getBoardData(boardId).then(boardData => setBoardData(boardData), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />));
+    IndexedDB.getBoardData(boardId).then(boardData => setBoardData(boardData), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />));
   }, [boardId]);
-
-  useEffect(() => {
-    if (boardData) {
-      const interval = setInterval(() => {
-        BridgeStorage.updateBoardData((boardData as BoardData).id, boardData as BoardData).catch(e => alert(e));
-      }, 10000);
-
-      if (updateDataInterval) clearInterval(updateDataInterval)
-
-      setUpdateDataInterval(interval);
-    };
-  }, [boardData]);
 
   return (
     <Panel id={id}>

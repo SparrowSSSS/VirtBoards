@@ -1,7 +1,11 @@
 import bridge from "@vkontakte/vk-bridge";
-import bridgeStoragesPS from "../config/bridgeStoragesPS";
 import { BoardData, BoardNameAndId } from "../config/types";
 import { parseStorageKey } from "../utils/parseStorageKeys";
+
+const bridgeStoragesPS = {
+    boardNames: "boardName",
+    boards: "board"
+};
 
 class BridgeStorage {
     static getUserName = async (): Promise<string> => {
@@ -68,32 +72,6 @@ class BridgeStorage {
             } else {
                 throw new Error("Данные отсутствуют в ВК хранилище");
             };
-        } catch (e) {
-            throw e;
-        };
-    };
-
-    static updateBoardData = async (boardId: number, boardData: BoardData) => {
-        try {
-            await bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${boardId}`, value: JSON.stringify(boardData) });
-        } catch (e) {
-            throw e;
-        };
-    }
-
-    static renameBoard = async (boardId: number, newBoardName: string) => {
-        try {
-            const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [`${bridgeStoragesPS.boards}-${boardId}`] });
-            const data = keys[0];
-            const boardData = JSON.parse(data.value) as BoardData;
-            boardData.name = newBoardName;
-    
-            await Promise.all(
-                [
-                    this.updateBoardData(boardId, boardData),
-                    bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}-${boardId}`, value: newBoardName })
-                ]
-            );
         } catch (e) {
             throw e;
         };

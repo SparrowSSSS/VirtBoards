@@ -73,7 +73,7 @@ class IndexedDB {
             db.close();
 
             if (boardsList && boardsList.length > 0) return boardsList;
-            else throw new Error("404");
+            else return [];
         } catch (e) {
             throw e;
         };

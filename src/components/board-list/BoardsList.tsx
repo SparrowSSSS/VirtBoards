@@ -1,9 +1,9 @@
 import { Group, Header, List, Placeholder, Spinner } from '@vkontakte/vkui';
 import { FC, useContext } from 'react';
-import { TInterfaceContext } from '../config/types';
-import { interfaceContext } from '../panels/Panels';
-import BoardsListComponent from './board-list-component/BoardsListComponent';
-import BoardListButtons from './board-list-buttons/BoardListButtons';
+import { TInterfaceContext } from '../../config/types';
+import { interfaceContext } from '../../panels/Panels';
+import BoardsListComponent from '../board-list-component/BoardsListComponent';
+import BoardListButtons from '../board-list-buttons/BoardListButtons';
 
 export const BoardsList: FC = () => {
 

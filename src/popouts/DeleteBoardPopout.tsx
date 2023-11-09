@@ -3,9 +3,8 @@ import { FC, useContext } from 'react'
 import errorsPS from '../config/errorsPS';
 import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
-import GeneralServices from '../services/generalServices';
+import IndexedDB from '../services/indexedService';
 import getErrorMessage from '../utils/getErrorMessage';
-import ErrorPopout from './ErrorPopout';
 
 interface Props {
   boardId: number,
@@ -14,13 +13,13 @@ interface Props {
 
 const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
 
-  const { popouts: { setPopout }, boards: { boardsList, setBoardsList }, loading: { setIsLoading } } = useContext(interfaceContext) as TInterfaceContext;
+  const { popouts: { setPopout }, boards: { boardsList, setBoardsList }, loading: { setIsLoading }, func: {catchError} } = useContext(interfaceContext) as TInterfaceContext;
 
   const removeBoard: onClickRemoveBoard = async (boardId) => {
     setIsLoading(true);
 
     try {
-      await GeneralServices.deleteBoard(boardId);
+      await IndexedDB.deleteBoard(boardId);
 
       const list = [...(boardsList as BoardNameAndId[])];
 
@@ -34,9 +33,7 @@ const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
       setIsLoading(false);
       setBoardsList(list);
     } catch (e) {
-      setIsLoading(false);
-      setPopout(<ErrorPopout message={getErrorMessage(e)} errorPS={errorsPS.deleteBoard} />)
-      return;
+      catchError(getErrorMessage(e), errorsPS.deleteBoard);
     };
   };
 
