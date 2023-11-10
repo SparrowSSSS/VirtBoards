@@ -6,7 +6,7 @@ import { TInterfaceContext } from '../../config/types';
 import AddBoardModal from '../../modals/AddBoardModal';
 import { modals } from '../../modals/Modals';
 import { interfaceContext } from '../../panels/Panels';
-import IndexedDB from '../../services/indexedService';
+import GeneralService from '../../services/generalServices';
 import BoardLimitSnackbar from '../../snackbars/BoardLimitSnackbar';
 import BoardFileRead from './board-file-read/BoardFileRead';
 
@@ -22,7 +22,9 @@ const BoardListButtons: FC = () => {
 
             try {
 
-                const boards = await IndexedDB.getBoardsList();
+                const boards = await GeneralService.getBoardsList("check");
+
+                console.log(boards)
 
                 if (boards.length < 3 && boardsList.length < 3) {
                     setActiveModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });

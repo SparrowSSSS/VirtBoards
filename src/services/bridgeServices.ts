@@ -1,9 +1,8 @@
 import bridge from "@vkontakte/vk-bridge";
 import { BoardData, BoardNameAndId } from "../config/types";
-import { parseStorageKey } from "../utils/parseStorageKeys";
 
 const bridgeStoragesPS = {
-    boardNames: "boardName",
+    boardNames: "boardNames",
     boards: "board"
 };
 
@@ -17,56 +16,71 @@ class BridgeStorage {
         } catch (e) {
             throw e;
         };
-    };
+    }
 
-    static getBoardsList = async (): Promise<BoardNameAndId[]> => {
-        try {
-            const { keys } = await bridge.send('VKWebAppStorageGetKeys', { count: 6, offset: 0 });
-
-            const boardNameKeys = parseStorageKey(keys, bridgeStoragesPS.boardNames);
-
-            if (boardNameKeys.length === 0) return [];
-
-            const boardsId = await bridge.send('VKWebAppStorageGet', { keys: boardNameKeys });
-
-            const boardsList: BoardNameAndId[] = [];
-
-            boardsId.keys.forEach(boardName => {
-                boardsList.push({ id: Number(boardName.key.split("-")[1]), name: boardName.value });
-            });
-
-            return boardsList;
-        } catch (e) {
-            throw e;
-        };
-    };
-
-    static addBoard = async (board: BoardData) => {
+    static addBoard = async (board: BoardData, newBoardsList: BoardNameAndId[]) => {
         try {
             await Promise.all([
-                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}-${board.id}`, value: board.name }),
+                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}`, value: JSON.stringify(newBoardsList) }),
                 bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${board.id}`, value: JSON.stringify(board) })
             ]);
         } catch (e) {
             throw e;
         };
-    };
+    }
 
-    static deleteBoard = async (boardId: number) => {
+    static updateBoardData = async (newBoardData: BoardData) => {
+        try {
+            await bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${newBoardData.id}`, value: JSON.stringify(newBoardData) });
+        } catch (e) {
+            throw e;
+        };
+    }
+
+    static getBoardsList = async (): Promise<BoardNameAndId[]> => {
+        try {
+            const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [bridgeStoragesPS.boardNames] });
+
+            if (!keys[0].value) return [];
+
+            const boardsList = JSON.parse(keys[0].value) as BoardNameAndId[];
+
+            return boardsList;
+        } catch (e) {
+            throw e;
+        };
+    }
+
+    static deleteBoard = async (boardId: number, newBoardsList: BoardNameAndId[]) => {
         try {
             await Promise.all([
-                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}-${boardId}`, value: "" }),
+                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}`, value: JSON.stringify(newBoardsList) }),
                 bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${boardId}`, value: "" })
             ]);
         } catch (e) {
             throw e;
         };
-    };
+    }
+
+    static renameBoard = async (newBoardsList: BoardNameAndId[], newBoardName: BoardNameAndId) => {
+        try {
+            const boardData = await this.getBoardData(newBoardName.id);
+
+            const newBoardData: BoardData = {...boardData, name: newBoardName.name};
+
+            await Promise.all([
+                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boardNames}`, value: JSON.stringify(newBoardsList) }),
+                bridge.send('VKWebAppStorageSet', { key: `${bridgeStoragesPS.boards}-${newBoardName.id}`, value: JSON.stringify({...boardData, name: newBoardData}) })
+            ]);
+        } catch (e) {
+            throw e;
+        };
+    }
 
     static getBoardData = async (boardId: number): Promise<BoardData> => {
         try {
             const { keys } = await bridge.send('VKWebAppStorageGet', { keys: [`${bridgeStoragesPS.boards}-${boardId}`] });
-    
+
             if (keys.length) {
                 return JSON.parse(keys[0].value);
             } else {
@@ -75,7 +89,7 @@ class BridgeStorage {
         } catch (e) {
             throw e;
         };
-    };
+    }
 };
 
 export default BridgeStorage;

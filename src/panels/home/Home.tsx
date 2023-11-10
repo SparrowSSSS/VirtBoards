@@ -9,7 +9,7 @@ import getErrorMessage from "../../utils/getErrorMessage";
 import errorsPS from "../../config/errorsPS";
 import BridgeStorage from "../../services/bridgeServices";
 import ErrorPopout from "../../popouts/ErrorPopout";
-import IndexedDB from "../../services/indexedService";
+import GeneralService from "../../services/generalServices";
 
 interface Props {
   id: string
@@ -17,7 +17,7 @@ interface Props {
 
 const Home: FC<Props> = ({ id }) => {
 
-  const { boards: { setBoardsList }, panels: { setActivePanel }, user: {setUserName, userName}, popouts: {setPopout} } = useContext(interfaceContext) as TInterfaceContext;
+  const { boards: { setBoardsList }, panels: { setActivePanel }, user: { setUserName, userName }, popouts: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
 
   const go = (nextPanel: string) => {
     localStorage.setItem(localStorages.activePanel, nextPanel);
@@ -25,25 +25,25 @@ const Home: FC<Props> = ({ id }) => {
   };
 
   useEffect(() => {
-    IndexedDB.getBoardsList().then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
+    GeneralService.getBoardsList("init").then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
     BridgeStorage.getUserName().then(name => setUserName(name), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getUserName} />));
   }, []);
 
-return (
-  <Panel id={id}>
-    <PanelHeader>Главная</PanelHeader>
-    <Group>
-      <Placeholder
-        icon={<Avatar size={56} />}
-        header={`Добро пожаловать, ${userName ? userName : "..."}`}
-      >
-        Мы рады видеть вас! Если вы впервые запустили приложение, то для вас не бесполезным будет ознакомление с <Link onClick={() => go(panels.documentation)}>документацией</Link>
-      </Placeholder>
-      <Separator />
-      <BoardsList />
-    </Group>
-  </Panel>
-)
+  return (
+    <Panel id={id}>
+      <PanelHeader>Главная</PanelHeader>
+      <Group>
+        <Placeholder
+          icon={<Avatar size={56} />}
+          header={`Добро пожаловать, ${userName ? userName : "..."}`}
+        >
+          Мы рады видеть вас! Если вы впервые запустили приложение, то для вас не бесполезным будет ознакомление с <Link onClick={() => go(panels.documentation)}>документацией</Link>
+        </Placeholder>
+        <Separator />
+        <BoardsList />
+      </Group>
+    </Panel>
+  )
 };
 
 export default Home;

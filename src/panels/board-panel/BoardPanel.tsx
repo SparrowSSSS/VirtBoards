@@ -8,7 +8,8 @@ import Board from "../../components/board/Board";
 import getErrorMessage from "../../utils/getErrorMessage";
 import errorsPS from "../../config/errorsPS";
 import ErrorPopout from "../../popouts/ErrorPopout";
-import IndexedDB from "../../services/indexedService";
+import GeneralService from "../../services/generalServices";
+import BridgeStorage from "../../services/bridgeServices";
 
 interface Props {
   id: string
@@ -19,6 +20,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
   const [boardData, setBoardData] = useState<BoardData>();
 
   const [fullScreenBoard, setFullScreenBoard] = useState(false);
+  const [updateInterval, setUpdateInterval] = useState<NodeJS.Timer | null>();
 
   const { panels: { setActivePanel }, popouts: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
 
@@ -32,8 +34,20 @@ const BoardPanel: FC<Props> = ({ id }) => {
   const platform = usePlatform();
 
   useEffect(() => {
-    IndexedDB.getBoardData(boardId).then(boardData => setBoardData(boardData), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />));
+    GeneralService.getBoardData(boardId).then(boardData => setBoardData(boardData), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />));
   }, [boardId]);
+
+  useEffect(() => {
+    if (boardData) {
+      const interval = setInterval(async () => {
+        await BridgeStorage.updateBoardData(boardData);
+      }, 10000);
+
+      if (updateInterval) clearInterval(updateInterval);
+
+      setUpdateInterval(interval);
+    };
+  }, [boardData]);
 
   return (
     <Panel id={id}>

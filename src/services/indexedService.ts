@@ -6,21 +6,8 @@ export interface MyDB extends DBSchema {
     boards: {
         key: number,
         value: BoardData
-    },
-
-    boardNames: {
-        key: number,
-        value: BoardNameAndId
     }
-
 };
-
-export class OpenDBError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "OpenDBError"
-    }
-}
 
 const config = {
     dbName: "boards-store",
@@ -28,7 +15,6 @@ const config = {
     dbUpgrade: (db: IDBPDatabase<MyDB>, oldVersion: number) => {
         if (oldVersion == 0) {
             db.createObjectStore("boards", { keyPath: "id" });
-            db.createObjectStore("boardNames", { keyPath: "id" });
         };
     }
 };
@@ -41,15 +27,15 @@ const createDB = async () => {
             },
 
             blocked() {
-                throw new OpenDBError("Не удаётся подключиться к локальной базе данных, рекомендуем закрыть все вкладки с приложением, кроме этой");
+                throw new Error("Не удаётся подключиться к локальной базе данных, рекомендуем закрыть все вкладки с приложением, кроме этой");
             },
 
             blocking() {
-                throw new OpenDBError("Рекомендуем закрыть текущую вкладку с приложением, так как она препятствует работе с локальной базой данных");
+                throw new Error("Рекомендуем закрыть текущую вкладку с приложением, так как она препятствует работе с локальной базой данных");
             },
 
             terminated() {
-                throw new OpenDBError("Неизвестная ошибка подключения к локальной базой данных");
+                throw new Error("Неизвестная ошибка подключения к локальной базой данных");
             }
         });
 
@@ -60,58 +46,19 @@ const createDB = async () => {
 };
 
 class IndexedDB {
-    static getBoardsList = async (): Promise<BoardNameAndId[]> => {
+
+    static addBoard = async (board: BoardData) => {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction("boardNames", "readonly");
+            const transaction = db.transaction("boards", "readwrite");
 
-            const bn = transaction.objectStore("boardNames");
+            const boards = transaction.objectStore("boards");
 
-            const boardsList = await bn.getAll();
-
-            db.close();
-
-            if (boardsList && boardsList.length > 0) return boardsList;
-            else return [];
+            await boards.put(board);
         } catch (e) {
             throw e;
-        };
-    }
-
-    static cleardDB = async () => {
-        try {
-            const db = await createDB();
-
-            const transaction = db.transaction(["boardNames", "boards"], "readwrite");
-
-            const bn = transaction.objectStore("boardNames");
-            const b = transaction.objectStore("boards");
-
-            await Promise.all([bn.clear(), b.clear()]);
-        } catch (e) {
-            throw e;
-        };
-    }
-
-    static setBoardsList = async (boardsList: BoardNameAndId[]) => {
-        try {
-            const db = await createDB();
-
-            const transaction = db.transaction("boardNames", "readwrite");
-
-            const bn = transaction.objectStore("boardNames");
-
-            const list = [];
-
-            for (let i of boardsList) {
-                list.push(bn.add(i));
-            };
-
-            await Promise.all(list);
-        } catch (e) {
-            throw e;
-        };
+        }
     }
 
     static getBoardData = async (boardId: number): Promise<BoardData> => {
@@ -128,7 +75,7 @@ class IndexedDB {
             return boardData;
         } catch (e) {
             throw e;
-        };
+        }
     }
 
     static updateBoardData = async (boardData: BoardData) => {
@@ -142,54 +89,37 @@ class IndexedDB {
             await boards.put(boardData);
         } catch (e) {
             throw e;
-        };
+        }
     }
 
     static deleteBoard = async (boardId: number) => {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
+            const transaction = db.transaction("boards", "readwrite");
 
             const boards = transaction.objectStore("boards");
-            const boardNames = transaction.objectStore("boardNames");
 
-            await Promise.all([boards.delete(boardId), boardNames.delete(boardId)]);
+            await Promise.all([boards.delete(boardId)]);
         } catch (e) {
             throw e;
-        };
+        }
     }
 
-    static addBoard = async (board: BoardData) => {
+    static renameBoard = async (newBoardName: BoardNameAndId) => {
         try {
             const db = await createDB();
 
-            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
+            const transaction = db.transaction("boards", "readwrite");
 
             const boards = transaction.objectStore("boards");
-            const boardNames = transaction.objectStore("boardNames");
 
-            await Promise.all([boards.add(board), boardNames.add({id: board.id, name: board.name})]);
+            const boardData = await boards.get(newBoardName.id) as BoardData;
+
+            await Promise.all([boards.put({...boardData, name: newBoardName.name})]);
         } catch (e) {
             throw e;
-        };
-    }
-
-    static renameBoard = async (boardId: number, newBoardName: string) => {
-        try {
-            const db = await createDB();
-
-            const transaction = db.transaction(["boards", "boardNames"], "readwrite");
-
-            const boards = transaction.objectStore("boards");
-            const boardNames = transaction.objectStore("boardNames");
-
-            const boardData = await boards.get(boardId) as BoardData;
-
-            await Promise.all([boards.put({...boardData, name: newBoardName}), boardNames.put({name: newBoardName, id: boardId})]);
-        } catch (e) {
-            throw e;
-        };
+        }
     };
 };
 

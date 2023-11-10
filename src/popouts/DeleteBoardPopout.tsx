@@ -3,7 +3,7 @@ import { FC, useContext } from 'react'
 import errorsPS from '../config/errorsPS';
 import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../config/types';
 import { interfaceContext } from '../panels/Panels';
-import IndexedDB from '../services/indexedService';
+import GeneralService from '../services/generalServices';
 import getErrorMessage from '../utils/getErrorMessage';
 
 interface Props {
@@ -19,7 +19,7 @@ const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
     setIsLoading(true);
 
     try {
-      await IndexedDB.deleteBoard(boardId);
+      await GeneralService.deleteBoard(boardId);
 
       const list = [...(boardsList as BoardNameAndId[])];
 

@@ -4,13 +4,14 @@ import { ChangeEvent, FC, useContext } from 'react';
 import errorsPS from '../../../config/errorsPS';
 import { TInterfaceContext } from '../../../config/types';
 import { interfaceContext } from '../../../panels/Panels';
-import IndexedDB from '../../../services/indexedService';
+import GeneralService from '../../../services/generalServices';
 import BoardLimitSnackbar from '../../../snackbars/BoardLimitSnackbar';
 import readerLoad from './readerLoad';
+import validJSON from './validJSON';
 
 export const BoardFileRead: FC = () => {
 
-    const { boards: { boardsList, setBoardsList }, snackbars: { setSnackbar }, loading: { setIsLoading }, func: {catchError} } = useContext(interfaceContext) as TInterfaceContext;
+    const { boards: { boardsList, setBoardsList }, snackbars: { setSnackbar }, loading: { setIsLoading }, func: { catchError } } = useContext(interfaceContext) as TInterfaceContext;
 
     const platform = usePlatform();
 
@@ -19,7 +20,7 @@ export const BoardFileRead: FC = () => {
             setIsLoading(true);
 
             try {
-                const bl = await IndexedDB.getBoardsList();
+                const bl = await GeneralService.getBoardsList("check");
 
                 if (bl.length < 3 && boardsList.length < 3) {
                     if (e.target.files && e.target.files.length > 0) {
@@ -30,17 +31,21 @@ export const BoardFileRead: FC = () => {
                         reader.readAsText(file);
 
                         reader.onload = async () => {
-                            if (reader.result) {
-                                try {
-                                    const board = await readerLoad(reader, boardsList);
+                            try {
+                                if (typeof (reader.result) === 'string' && validJSON(reader.result)) {
+                                    try {
+                                        const board = await readerLoad(reader, boardsList);
 
-                                    setIsLoading(false);
-                                    setBoardsList([...boardsList, board]);
-                                } catch (e) {
-                                    catchError(e, errorsPS.dBoard);
+                                        setIsLoading(false);
+                                        setBoardsList([...boardsList, board]);
+                                    } catch (e) {
+                                        catchError(e, errorsPS.dBoard);
+                                    };
+                                } else {
+                                    throw new Error("Невалидный JSON");
                                 };
-                            } else {
-                                catchError(new Error("Отсутствуют данные"), errorsPS.dBoard);
+                            } catch (e) {
+                                catchError(e, errorsPS.dBoard);
                             };
                         };
 

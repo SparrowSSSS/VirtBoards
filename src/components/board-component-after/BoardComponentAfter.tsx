@@ -1,4 +1,4 @@
-import { Div, Link } from '@vkontakte/vkui';
+import { Div, Link, usePlatform } from '@vkontakte/vkui';
 import { FC, MouseEvent, useContext } from 'react';
 import { Icon24Cancel } from '@vkontakte/icons';
 import { BoardNameAndId, TInterfaceContext } from '../../config/types';
@@ -18,6 +18,8 @@ interface Props {
 
 export const BoardComponentActions: FC<Props> = ({ board }) => {
 
+  const platform = usePlatform();
+
   const { popouts: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
 
   const handleRemoveBoard = (boardId: number, e: MouseEvent<SVGSVGElement, globalThis.MouseEvent>, boardName: string) => {
@@ -30,7 +32,7 @@ export const BoardComponentActions: FC<Props> = ({ board }) => {
 
     try {
       const boardData = await IndexedDB.getBoardData(boardId);
-      loadFromUrl(boardData);
+      loadFromUrl(boardData, platform);
     } catch (error) {
       setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />);
     };

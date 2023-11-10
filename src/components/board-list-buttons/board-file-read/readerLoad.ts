@@ -1,5 +1,5 @@
 import { BoardData, BoardNameAndId } from "../../../config/types";
-import IndexedDB from "../../../services/indexedService";
+import GeneralService from "../../../services/generalServices";
 import checkOrigin from "../../../utils/checkOrigin";
 
 const readerLoad = async (reader: FileReader, boardsList: BoardNameAndId[]) => {
@@ -15,7 +15,7 @@ const readerLoad = async (reader: FileReader, boardsList: BoardNameAndId[]) => {
             };
         };
 
-        await IndexedDB.addBoard(board);
+        await GeneralService.addBoard(board);
 
         return board;
     } catch (e) {

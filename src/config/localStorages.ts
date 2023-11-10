@@ -1,6 +1,7 @@
 const localStorages = {
     activePanel: "activePanel",
-    activeBoard: "activeBoard"
+    activeBoard: "activeBoard",
+    boards: "boardNames"
 };
 
 export default localStorages;

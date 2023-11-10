@@ -6,7 +6,7 @@ import getErrorMessage from "../../utils/getErrorMessage";
 import errorsPS from "../../config/errorsPS";
 import checkOrigin from "../../utils/checkOrigin";
 import validateBoardName from "../../utils/validateBoardName";
-import IndexedDB from "../../services/indexedService";
+import GeneralService from "../../services/generalServices";
 
 interface Props {
     type: "rename" | "add",
@@ -34,9 +34,9 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
         };
 
         try {
-            const bridgeBoardsList = await IndexedDB.getBoardsList();
+            const checkBoardsList = await GeneralService.getBoardsList("check");
 
-            if (!checkOrigin(vBoardName, bridgeBoardsList)) setError({ isError: true, message: "Доска с подобным именем уже существует" });
+            if (!checkOrigin(vBoardName, checkBoardsList)) setError({ isError: true, message: "Доска с подобным именем уже существует" });
             else if (boardsList !== "loading" && !error.isError) {
                 await successAction(vBoardName);
             };
@@ -52,7 +52,7 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
             setActiveModal(null);
 
             const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
-            await IndexedDB.addBoard(board);
+            await GeneralService.addBoard(board);
 
             setBoardsList([...(boardsList as BoardNameAndId[]), board]);
         } catch (e) {
@@ -64,7 +64,7 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
         try {
             setActiveModal(null);
 
-            await IndexedDB.renameBoard(boardId as number, vBoardName);
+            await GeneralService.renameBoard(boardId as number, vBoardName);
 
             const newBoardsList = [...(boardsList as BoardNameAndId[])];
 
