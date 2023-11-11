@@ -1,23 +1,17 @@
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import bridge from "@vkontakte/vk-bridge";
 import App from "./App";
 
-// Init VK  Mini App
 bridge.send("VKWebAppInit");
 
-ReactDOM.render(<App />, document.getElementById("root"));
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
 
-bridge.send('VKWebAppStorageGetKeys', {
-  count: 20,
-  offset: 0
-})
-  .then((data) => {
-    console.log(data);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+root.render(
+  <App />
+);
 
 if (process.env.NODE_ENV === "development") {
-  import("./eruda").then(({ default: eruda }) => { }); //runtime download
-}
+  import("./eruda").then(({ default: eruda }) => { });
+};

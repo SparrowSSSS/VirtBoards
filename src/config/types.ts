@@ -69,9 +69,18 @@ export type TInterfaceContext = {
 };
 
 export type TBoardContext = {
-    fullScreenBoard: boolean,
-    boardData?: BoardData,
-    setBoardModal: (value: SetStateAction<ReactNode | null>) => void,
-    setBoardData: (value: SetStateAction<BoardData | undefined>) => void,
-    setFullScreenBoard: (value: SetStateAction<boolean>) => void
+    fullscreen: {
+        fullScreenBoard: boolean,
+        setFullScreenBoard: (value: SetStateAction<boolean>) => void
+    },
+
+    modals: {
+        boardModal: TModal | null,
+        setBoardModal: (value: SetStateAction<TModal | null>) => void
+    },
+
+    data: {
+        boardData?: BoardData,
+        setBoardData: (value: SetStateAction<BoardData | undefined>) => void
+    }
 };

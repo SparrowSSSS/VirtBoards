@@ -8,7 +8,7 @@ import VKCOMPanel from './VKCOMPanel';
 
 const BoardBottomPanel: FC = () => {
 
-    const { setFullScreenBoard } = useContext(boardContext) as TBoardContext;
+    const { fullscreen: {setFullScreenBoard} } = useContext(boardContext) as TBoardContext;
 
     const platform = usePlatform();
 

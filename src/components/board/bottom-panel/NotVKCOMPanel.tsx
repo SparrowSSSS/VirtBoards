@@ -11,7 +11,7 @@ interface Props {
 
 const NotVKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
 
-    const { fullScreenBoard } = useContext(boardContext) as TBoardContext;
+    const { fullscreen: {fullScreenBoard} } = useContext(boardContext) as TBoardContext;
 
     return (
         <div className={`${styles.boardBottomPanel} ${fullScreenBoard ? styles.boardBottomPanelFullScreenTl : ""}`}>

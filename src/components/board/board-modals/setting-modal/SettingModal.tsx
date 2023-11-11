@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, Separator, Header, FormLayout, FormItem, Spacing } from '@vkontakte/vkui';
+import { Button, ButtonGroup, Checkbox, FormLayout, FormItem } from '@vkontakte/vkui';
 import { FC, useContext, useState } from 'react'
 import { TBoardContext, TSettings } from '../../../../config/types';
 import { boardContext } from '../../Board';
@@ -8,7 +8,7 @@ import IndexedDB from '../../../../services/indexedService';
 
 export const SettingModal: FC = () => {
 
-    const { boardData, setBoardData } = useContext(boardContext) as TBoardContext;
+    const { data: { boardData, setBoardData } } = useContext(boardContext) as TBoardContext;
 
     const [firstOptions, setFirstOptions] = useState<TSettings>({ ...boardData?.settings });
     const [options, setOptions] = useState<TSettings>(firstOptions);
@@ -28,35 +28,25 @@ export const SettingModal: FC = () => {
     };
 
     return (
-        <div>
-            <FormLayout>
-                <Header><div style={{ color: "black", fontWeight: "bold" }}>Настройки</div></Header>
-                <Spacing size={15}>
-                    <Separator />
-                </Spacing>
-                <Checkbox checked={options.grid} onClick={() => handleCheckGrid()}><div style={{ color: "black" }}>Сетка</div></Checkbox>
-                {options !== firstOptions
-                    ? (
-                        <>
-                            <ButtonGroup mode="horizontal" style={{ marginTop: "15px" }}>
-                                <FormItem>
-                                    <Button onClick={() => setOptions(firstOptions)} size="m" stretched>
-                                        Отмена
-                                    </Button>
-                                </FormItem>
-                                <FormItem>
-                                    <Button onClick={() => acceptSettings()} size="m" stretched>
-                                        Принять
-                                    </Button>
-                                </FormItem>
-                            </ButtonGroup>
-                        </>
-                    )
+        <FormLayout>
+            <Checkbox checked={options.grid} onClick={() => handleCheckGrid()}>Сетка</Checkbox>
+            {options !== firstOptions
+                ? (
+                    <FormItem>
+                        <ButtonGroup mode="horizontal" stretched>
+                            <Button onClick={() => setOptions(firstOptions)} size="m" stretched>
+                                Отмена
+                            </Button>
+                            <Button onClick={() => acceptSettings()} size="m" stretched>
+                                Принять
+                            </Button>
+                        </ButtonGroup>
+                    </FormItem>
+                )
 
-                    : null
-                }
-            </FormLayout>
-        </div>
+                : null
+            }
+        </FormLayout>
     )
 };
 

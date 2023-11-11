@@ -1,25 +1,26 @@
-import { FC, ReactNode, useContext, useEffect } from 'react';
-import styles from "./BoardModal.module.css";
-import { Icon24CancelOutline } from '@vkontakte/icons';
-import { boardContext } from '../Board';
+import { ModalPage, ModalPageHeader, ModalRoot } from '@vkontakte/vkui';
+import { FC, useContext } from 'react'
 import { TBoardContext } from '../../../config/types';
+import { boardContext } from '../Board';
 
-export const BoardModal: FC = ({ children }: { children?: ReactNode }) => {
+export const boardModals = {
+    settingsModal: "settings-modal"
+}
 
-    const { setBoardModal } = useContext(boardContext) as TBoardContext;
+const BoardModal: FC = () => {
+
+    const {modals: {boardModal, setBoardModal}} = useContext(boardContext) as TBoardContext;
 
     return (
-        <>
-            <div className={styles.boardModalOverlay} />
-            <div className={styles.boardModalConteiner}>
-                <div className={styles.boardModal}>
-                    {children}
-                </div>
-                <div className={styles.boardModalCancel} onClick={() => setBoardModal(null)}>
-                    <Icon24CancelOutline className={styles.boardModalCancelIcon} />
-                </div>
-            </div>
-        </>
+        <ModalRoot activeModal={boardModal?.id}>
+            <ModalPage
+                id={boardModals.settingsModal}
+                header={<ModalPageHeader>Настройки</ModalPageHeader>}
+                onClose={() => setBoardModal(null)}
+            >
+                {boardModal?.modal}
+            </ModalPage>
+        </ModalRoot>
     )
 };
 
