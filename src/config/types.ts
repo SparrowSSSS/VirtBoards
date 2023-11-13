@@ -84,3 +84,19 @@ export type TBoardContext = {
         setBoardData: (value: SetStateAction<BoardData | undefined>) => void
     }
 };
+
+export type TStateDataCanvas = {
+    scroll: {
+        x: number,
+        y: number
+    },
+
+    windowSize: {
+        width: number,
+        height: number
+    }
+}
+
+export type TCanvasContext = {
+    data: TStateDataCanvas
+};

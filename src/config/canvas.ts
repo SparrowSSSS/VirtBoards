@@ -1,6 +1,7 @@
 const canvasConfig = {
-    width: 10000,
-    height: 10000
+    width: 5000,
+    height: 5000,
+    color: 0xebedf0
 };
 
 export default canvasConfig;

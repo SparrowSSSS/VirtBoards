@@ -1,12 +1,12 @@
-import { FC, createContext, SetStateAction, useRef, useEffect, useState } from 'react';
+import { FC, createContext, SetStateAction, useEffect, useState, CSSProperties } from 'react';
 import styles from "./Board.module.css";
 import { BoardData, TBoardContext, TModal } from '../../config/types';
 import BoardBottomPanel from './bottom-panel/BoardBottomPanel';
-import Grid from './grid/Grid';
 import BoardModal from './board-modals/BoardModal';
 import { SplitLayout } from '@vkontakte/vkui';
 import Canvas from './canvas/Canvas';
 import canvasConfig from '../../config/canvas';
+import elementsId from '../../config/elementsId';
 
 export const boardContext = createContext<TBoardContext | undefined>(undefined);
 
@@ -17,17 +17,24 @@ interface Props {
     setFullScreenBoard: (value: SetStateAction<boolean>) => void
 };
 
-export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenBoard, boardData }) => {
+const boardContainerStyles: CSSProperties = {
+    width: "90%",
+    height: "500px",
+    position: "relative",
+    backgroundColor: "transparent",
+    margin: "15px auto"
+}
 
-    const boardRef = useRef<HTMLDivElement>(null);
+export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenBoard, boardData }) => {
 
     const [boardModal, setBoardModal] = useState<TModal | null>(null);
 
     useEffect(() => {
+        const boardWindow = document.getElementById(elementsId.boardWindow);
 
-        if (boardRef.current) {
+        if (boardWindow) {
             if ((boardData?.components.length as number) === 0) {
-                boardRef.current.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
+                boardWindow.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
             };
         };
 
@@ -52,13 +59,11 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
 
     return (
         <boardContext.Provider value={boardContextValue}>
-            <div ref={boardRef} className={styles.boardWindow}>
-                {/**
-                 * <div className={styles.boardCanvas} ref={boardCanvasRef} onClick={e => console.log(e)}>
-                    {boardData?.settings.grid ? <Grid boardCanvasSize={{ width: boardCanvasSize?.width as number, height: boardCanvasSize?.height as number }} /> : null}
+            <div className={styles.boardContainer} style={boardContainerStyles}>
+                <div className={styles.boardWindow} id={elementsId.boardWindow}>
+                    <div style={{ width: canvasConfig.width, height: canvasConfig.height, position: "relative", zIndex: 1 }} />
+                    <Canvas />
                 </div>
-                 */}
-                <Canvas />
                 <div className={styles.controlInterface}>
                     <SplitLayout modal={<BoardModal />}></SplitLayout>
                 </div>

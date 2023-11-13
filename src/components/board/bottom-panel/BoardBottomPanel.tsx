@@ -12,7 +12,7 @@ const BoardBottomPanel: FC = () => {
 
     const platform = usePlatform();
 
-    const boardWindow = document.querySelector(`.${boardStyles.boardWindow}`) as HTMLElement;
+    const boardContainer = document.querySelector(`.${boardStyles.boardContainer}`) as HTMLElement;
 
     document.addEventListener("fullscreenchange", () => {
         if (!document.fullscreenElement) setFullScreenBoard(false);
@@ -20,7 +20,7 @@ const BoardBottomPanel: FC = () => {
     });
 
     const onFullScreen = () => {
-        boardWindow.requestFullscreen();
+        boardContainer.requestFullscreen();
     };
 
     const offFullScreen = () => {

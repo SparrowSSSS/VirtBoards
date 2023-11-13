@@ -3,13 +3,14 @@
     background-color: white;
     height: 50px;
     width: 50px;
-    right: 12%;
-    bottom: 20%;
+    right: 10%;
+    bottom: 10%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: #222222 1px solid;
     border-radius: 6px;
+    z-index: 1;
 }
 
 .boardBottomPanelFullScreen {
