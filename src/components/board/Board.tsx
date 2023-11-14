@@ -1,12 +1,13 @@
-import { FC, createContext, SetStateAction, useEffect, useState, CSSProperties } from 'react';
+import { FC, createContext, SetStateAction, useState, CSSProperties, useEffect, WheelEvent } from 'react';
 import styles from "./Board.module.css";
-import { BoardData, TBoardContext, TModal } from '../../config/types';
-import BoardBottomPanel from './bottom-panel/BoardBottomPanel';
+import { BoardData, TBoardContext, TModal, TTool } from '../../config/types';
 import BoardModal from './board-modals/BoardModal';
 import { SplitLayout } from '@vkontakte/vkui';
-import Canvas from './canvas/Canvas';
-import canvasConfig from '../../config/canvas';
-import elementsId from '../../config/elementsId';
+import ControlInterface from './control-interface/ControlInterface';
+import BoardWindow from './board-window/BoardWindow';
+import cursors from '../../config/cursors';
+import addBoardEvents from './boartContainerEvents';
+import BoardEvents from './boartContainerEvents';
 
 export const boardContext = createContext<TBoardContext | undefined>(undefined);
 
@@ -29,16 +30,19 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
 
     const [boardModal, setBoardModal] = useState<TModal | null>(null);
 
+    const [activeTool, setActiveTool] = useState<TTool>("cursor");
+
+    const [activeCursor, setActiveCursor] = useState(cursors.cursor);
+
+    const [boardWindow, setBoardWindow] = useState<HTMLDivElement | null>(null);
+
     useEffect(() => {
-        const boardWindow = document.getElementById(elementsId.boardWindow);
+        const boardContainer = document.querySelector(`.${styles.boardContainer}`) as HTMLDivElement;
 
-        if (boardWindow) {
-            if ((boardData?.components.length as number) === 0) {
-                boardWindow.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
-            };
+        if (boardContainer && boardWindow) {
+            new BoardEvents(boardWindow, boardContainer, setActiveCursor).addEvents();
         };
-
-    }, []);
+    }, [boardWindow]);
 
     const boardContextValue: TBoardContext = {
         modals: {
@@ -54,22 +58,34 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
         fullscreen: {
             fullScreenBoard,
             setFullScreenBoard
+        },
+
+        tools: {
+            activeTool,
+            setActiveTool
+        },
+
+        cursor: {
+            activeCursor,
+            setActiveCursor
+        },
+
+        window: {
+            boardWindow,
+            setBoardWindow
         }
-    }
+    };
 
     return (
-        <boardContext.Provider value={boardContextValue}>
-            <div className={styles.boardContainer} style={boardContainerStyles}>
-                <div className={styles.boardWindow} id={elementsId.boardWindow}>
-                    <div style={{ width: canvasConfig.width, height: canvasConfig.height, position: "relative", zIndex: 1 }} />
-                    <Canvas />
-                </div>
-                <div className={styles.controlInterface}>
+        <div className={styles.boardContainer} style={boardContainerStyles} >
+            <boardContext.Provider value={boardContextValue}>
+                <BoardWindow />
+                <div className={styles.modalInterface}>
                     <SplitLayout modal={<BoardModal />}></SplitLayout>
                 </div>
-                <BoardBottomPanel />
-            </div>
-        </boardContext.Provider>
+                <ControlInterface />
+            </boardContext.Provider>
+        </div>
     )
 };
 

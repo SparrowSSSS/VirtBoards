@@ -1,6 +1,5 @@
 const elementsId = {
-    boardWindow: "board-window",
-    canvasStage: "canvas-stage"
+    boardWindow: "board-window"
 };
 
 export default elementsId;

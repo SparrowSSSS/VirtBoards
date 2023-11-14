@@ -1,7 +1,7 @@
 import { FC, useContext} from 'react';
-import { TBoardContext } from '../../../config/types';
-import { boardContext } from '../Board';
-import boardStyles from '../Board.module.css';
+import { TBoardContext } from '../../../../config/types';
+import { boardContext } from '../../Board';
+import boardStyles from '../../Board.module.css';
 import { Platform, usePlatform } from '@vkontakte/vkui';
 import NotVKCOMPanel from './NotVKCOMPanel';
 import VKCOMPanel from './VKCOMPanel';

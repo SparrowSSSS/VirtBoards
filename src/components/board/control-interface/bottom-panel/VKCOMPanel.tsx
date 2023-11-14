@@ -1,10 +1,11 @@
 import { Icon24Fullscreen, Icon24FullscreenExit, Icon24Settings } from '@vkontakte/icons';
 import { FC, useContext } from 'react';
-import { BoardData, TBoardContext } from '../../../config/types';
-import { boardContext } from '../Board';
-import { boardModals } from '../board-modals/BoardModal';
-import SettingModal from '../board-modals/setting-modal/SettingModal';
+import { BoardData, TBoardContext } from '../../../../config/types';
+import { boardContext } from '../../Board';
+import { boardModals } from '../../board-modals/BoardModal';
+import SettingModal from '../../board-modals/setting-modal/SettingModal';
 import styles from "./BoardBottomPanel.module.css";
+import { boardBottomPanel, boardBottomPanelFullScreen } from './bottomPanelStyle';
 
 interface Props {
     onFullScreen: () => void,
@@ -23,14 +24,14 @@ const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
         <>
             {!fullScreenBoard
                 ? (
-                    <div className={styles.boardBottomPanel}>
+                    <div className={styles.boardBottomPanel} style={boardBottomPanel}>
                         <div className={styles.bottomPanelButton} onClick={() => onFullScreen()}>
                             <Icon24Fullscreen className={styles.boardIcon} />
                         </div>
                     </div>
                 )
                 : (
-                    <div className={`${styles.boardBottomPanel} ${styles.boardBottomPanelFullScreen}`}>
+                    <div className={`${styles.boardBottomPanel} ${styles.boardBottomPanelFullScreen}`} style={boardBottomPanelFullScreen}>
                         <div style={{ color: "#222222", fontWeight: "bold" }}>{valBoardName((boardData as BoardData).name)}</div>
                         <div style={{ display: "flex" }}>
                             <div className={styles.bottomPanelButton} style={{ marginRight: "15px" }} onClick={() => setBoardModal({id: boardModals.settingsModal, modal: <SettingModal />})}>

@@ -1,0 +1,36 @@
+.toolsPanel {
+    position: absolute;
+    background-color: white;
+    height: 50px;
+    min-width: 200px;
+    left: 50%;
+    bottom: 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: #222222 1px solid;
+    border-radius: 6px;
+    z-index: 1;
+    transform: translate(-50%, 0);
+    box-sizing: border-box;
+    padding: 15px;
+}
+
+.toolButton {
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 5px;
+    border-radius: 6px;
+    transition: 500ms;
+}
+
+.toolButton:hover {
+    background-color: #CCCCCC;
+}
+
+.toolsPanelIcon {
+    color: #222222;
+    margin: 0;
+    width: 30px !important;
+    height: 30px !important;
+}

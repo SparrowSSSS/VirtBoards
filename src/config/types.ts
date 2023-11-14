@@ -68,6 +68,8 @@ export type TInterfaceContext = {
     }
 };
 
+export type TTool = "cursor" | "pencil" | "eraser";
+
 export type TBoardContext = {
     fullscreen: {
         fullScreenBoard: boolean,
@@ -82,6 +84,21 @@ export type TBoardContext = {
     data: {
         boardData?: BoardData,
         setBoardData: (value: SetStateAction<BoardData | undefined>) => void
+    },
+
+    tools: {
+        activeTool: TTool,
+        setActiveTool: (value: SetStateAction<TTool>) => void
+    },
+
+    cursor: {
+        activeCursor: string,
+        setActiveCursor: (value: SetStateAction<string>) => void
+    },
+
+    window: {
+        boardWindow: HTMLDivElement | null,
+        setBoardWindow: (value: SetStateAction<HTMLDivElement | null>) => void
     }
 };
 

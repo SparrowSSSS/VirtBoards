@@ -1,7 +1,7 @@
 import { Container, Stage } from '@pixi/react';
-import { createContext, FC, useContext, useEffect, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useState, WheelEvent } from 'react';
 import canvasConfig from '../../../config/canvas';
-import elementsId from '../../../config/elementsId';
+import cursors from '../../../config/cursors';
 import { TBoardContext, TCanvasContext, TStateDataCanvas } from '../../../config/types';
 import { boardContext } from '../Board';
 import styles from "./Canvas.module.css";
@@ -11,29 +11,44 @@ export const canvasContext = createContext<TCanvasContext | null>(null);
 
 const Canvas: FC = () => {
 
-    const [boardWindow, setBoardWindow] = useState<HTMLElement>();
     const [stateData, setStateData] = useState<TStateDataCanvas>({ scroll: { x: 0, y: 0 }, windowSize: { width: 0, height: 0 } });
 
-    const { data: { boardData } } = useContext(boardContext) as TBoardContext;
+    const [render, setRender] = useState<boolean>(false);
+
+    const { data: { boardData }, fullscreen: { fullScreenBoard }, cursor: { activeCursor }, window: { boardWindow } } = useContext(boardContext) as TBoardContext;
 
     useEffect(() => {
-        const bWindow = document.getElementById(elementsId.boardWindow);
-
-        if (bWindow) {
-            setBoardWindow(bWindow);
+        if (boardWindow) {
+            setStateData({ scroll: { x: boardWindow.scrollLeft, y: boardWindow.scrollTop }, windowSize: { width: boardWindow.clientWidth, height: boardWindow.clientHeight } });
         };
+    }, [render]);
+
+    useEffect(() => {
+        const r = {render: render};
+        setInterval(() => {
+            setRender(!r.render);
+            r.render = !r.render;
+        }, 25);
     }, []);
 
-    useEffect(() => {
-        setInterval(() => {
-            if (boardWindow) {
-                setStateData({ scroll: { x: boardWindow.scrollLeft, y: boardWindow.scrollTop }, windowSize: { width: boardWindow.clientWidth, height: boardWindow.clientHeight } });
-            };
-        }, 10);
-    }, [boardWindow]);
+    const getCursor = () => {
+        if (fullScreenBoard) {
+            return activeCursor;
+        } else {
+            if (activeCursor !== cursors.pencil && activeCursor !== cursors.eraser) return activeCursor;
+            else return cursors.cursor;
+        };
+    };
 
     return (
-        <Stage width={stateData.windowSize.width} height={stateData.windowSize.height} options={{ backgroundColor: canvasConfig.color }} className={styles.boardCanvas} id={elementsId.canvasStage}>
+        <Stage
+            style={{ cursor: getCursor() }}
+            width={stateData.windowSize.width}
+            height={stateData.windowSize.height}
+            options={{ backgroundColor: canvasConfig.color }}
+            className={styles.boardCanvas}
+            
+        >
             <canvasContext.Provider value={{ data: stateData }}>
                 <Container>
                     {boardData?.settings.grid ? <Grid /> : null}

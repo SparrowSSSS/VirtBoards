@@ -1,0 +1,6 @@
+.boardWindow {
+    background-color: transparent;
+    overflow: scroll;
+    width: 100%;
+    height: 100%;
+}
