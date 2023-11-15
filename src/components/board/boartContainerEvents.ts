@@ -1,4 +1,4 @@
-import { SetStateAction, WheelEvent } from "react";
+import { SetStateAction } from "react";
 import cursors from "../../config/cursors";
 
 class BoardEvents {
@@ -7,38 +7,58 @@ class BoardEvents {
     boardContainer: HTMLDivElement;
     setActiveCursor: (value: SetStateAction<string>) => void;
 
+    wheelK = 150;
+    mouseMoveK = 5;
+
     constructor(boardWindow: HTMLDivElement, boardContainer: HTMLDivElement, setActiveCursor: (value: SetStateAction<string>) => void) {
         this.boardWindow = boardWindow;
         this.boardContainer = boardContainer;
         this.setActiveCursor = setActiveCursor;
     }
 
-    boardWindowWhell(e: WheelEvent<HTMLDivElement>) {
-        e.preventDefault();
-
+    boardWindowWhell(deltaY: number) {
         if (this.boardWindow) {
-            this.boardWindow.scrollBy(0, e.deltaY);
+            let by;
+
+            if (deltaY > 0) by = this.wheelK;
+            else by = -this.wheelK;
+
+            this.boardWindow.scrollBy(0, by);
         };
     }
 
-    boardMouseMove(startX: number, startY: number, newX: number, newY: number) {
-        this.boardWindow.scrollBy(newX - startX, newY - startY);
+    boardMouseMove(newX: number, newY: number, x: number, y: number) {
+        let byX = 0;
+        let byY = 0;
+
+        if (newX < x) byX = this.mouseMoveK;
+        else if (newX > x) byX = -this.mouseMoveK;
+
+        if (newY < y) byY = this.mouseMoveK;
+        else if (newY > y) byY = -this.mouseMoveK;
+
+        this.boardWindow.scrollBy(byX, byY);
     };
 
     addEvents() {
         this.boardContainer.addEventListener("wheel", e => {
-            this.boardWindowWhell((e as unknown) as WheelEvent<HTMLDivElement>);
+            e.preventDefault();
+            this.boardWindowWhell(e.deltaY);
         }, { passive: false });
 
         this.boardContainer.addEventListener("mousedown", e => {
+            e.preventDefault();
+
             if (e.button === 1) {
                 this.setActiveCursor(cursors.grabbing);
 
-                const startX = e.clientX;
-                const startY = e.clientY;
+                let x = e.clientX;
+                let y = e.clientY;
 
                 const mouseMove = (e: MouseEvent) => {
-                    this.boardMouseMove(startX, startY, e.clientX, e.clientY);
+                    this.boardMouseMove(e.clientX, e.clientY, x, y);
+                    x = e.clientX;
+                    y = e.clientY;
                 };
 
                 this.boardContainer.addEventListener("mousemove", mouseMove);
