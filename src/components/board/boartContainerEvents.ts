@@ -1,75 +1,81 @@
-import { SetStateAction } from "react";
+import { SetStateAction, MouseEvent, WheelEvent } from "react";
 import cursors from "../../config/cursors";
+import { TTool } from "../../config/types";
 
 class BoardEvents {
 
-    boardWindow: HTMLDivElement;
-    boardContainer: HTMLDivElement;
+    boardWindow: HTMLDivElement | null;
     setActiveCursor: (value: SetStateAction<string>) => void;
 
     wheelK = 150;
     mouseMoveK = 5;
 
-    constructor(boardWindow: HTMLDivElement, boardContainer: HTMLDivElement, setActiveCursor: (value: SetStateAction<string>) => void) {
+    down: boolean;
+
+    lastX: number;
+    lastY: number;
+
+    lastCursor: string;
+
+    constructor(boardWindow: HTMLDivElement | null, setActiveCursor: (value: SetStateAction<string>) => void) {
         this.boardWindow = boardWindow;
-        this.boardContainer = boardContainer;
         this.setActiveCursor = setActiveCursor;
+        this.lastX = 0;
+        this.lastY = 0;
+        this.down = false;
+        this.lastCursor = "default";
     }
 
-    boardWindowWhell(deltaY: number) {
-        if (this.boardWindow) {
+    onWheel = (e: WheelEvent<HTMLDivElement>, down: boolean, tool: TTool) => {
+        if (!(down && tool === "pencil") && this.boardWindow) {
             let by;
 
-            if (deltaY > 0) by = this.wheelK;
+            if (e.deltaY > 0) by = this.wheelK;
             else by = -this.wheelK;
 
             this.boardWindow.scrollBy(0, by);
         };
     }
 
-    boardMouseMove(newX: number, newY: number, x: number, y: number) {
+    onMouseDown = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>, activeCursor: string, mouseDown: boolean) => {
+        e.preventDefault();
+
+        if (e.button === 1 && this.boardWindow && !mouseDown) {
+            this.lastCursor = activeCursor;
+            this.setActiveCursor(cursors.grabbing);
+
+            this.lastX = e.clientX;
+            this.lastY = e.clientY;
+
+            this.down = true;
+        };
+    }
+
+    mouseMove = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>) => {
+        if (!this.down) return;
+
         let byX = 0;
         let byY = 0;
 
-        if (newX < x) byX = this.mouseMoveK;
-        else if (newX > x) byX = -this.mouseMoveK;
+        if (e.clientX < this.lastX) byX = this.mouseMoveK;
+        else if (e.clientX > this.lastX) byX = -this.mouseMoveK;
 
-        if (newY < y) byY = this.mouseMoveK;
-        else if (newY > y) byY = -this.mouseMoveK;
+        if (e.clientY < this.lastY) byY = this.mouseMoveK;
+        else if (e.clientY > this.lastY) byY = -this.mouseMoveK;
 
-        this.boardWindow.scrollBy(byX, byY);
-    };
+        this.boardWindow?.scrollBy(byX, byY);
 
-    addEvents() {
-        this.boardContainer.addEventListener("wheel", e => {
-            e.preventDefault();
-            this.boardWindowWhell(e.deltaY);
-        }, { passive: false });
-
-        this.boardContainer.addEventListener("mousedown", e => {
-            e.preventDefault();
-
-            if (e.button === 1) {
-                this.setActiveCursor(cursors.grabbing);
-
-                let x = e.clientX;
-                let y = e.clientY;
-
-                const mouseMove = (e: MouseEvent) => {
-                    this.boardMouseMove(e.clientX, e.clientY, x, y);
-                    x = e.clientX;
-                    y = e.clientY;
-                };
-
-                this.boardContainer.addEventListener("mousemove", mouseMove);
-
-                this.boardContainer.addEventListener("mouseup", () => {
-                    this.boardContainer.removeEventListener("mousemove", mouseMove);
-                    this.setActiveCursor(cursors.cursor);
-                }, { once: true });
-            };
-        });
+        this.lastX = e.clientX;
+        this.lastY = e.clientY;
     }
+
+    mouseOut = () => {
+        if (!this.down) return;
+
+        this.down = false;
+
+        this.setActiveCursor(this.lastCursor);
+    };
 };
 
 export default BoardEvents;

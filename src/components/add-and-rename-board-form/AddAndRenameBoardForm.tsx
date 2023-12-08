@@ -2,11 +2,10 @@ import { Button, FormItem, FormLayout, Input } from "@vkontakte/vkui";
 import { FC, useContext, useState } from "react";
 import { interfaceContext } from "../../panels/Panels";
 import { BoardNameAndId, TInterfaceContext } from "../../config/types";
-import getErrorMessage from "../../utils/getErrorMessage";
-import errorsPS from "../../config/errorsPS";
 import checkOrigin from "../../utils/checkOrigin";
 import validateBoardName from "../../utils/validateBoardName";
-import GeneralService from "../../services/generalServices";
+import useBoardMutation from "../../hooks/useBoardMutation";
+import getId from "../../utils/getId";
 
 interface Props {
     type: "rename" | "add",
@@ -15,7 +14,7 @@ interface Props {
     index?: number
 };
 
-const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
+const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, type }) => {
 
     const [boardName, setBoardName] = useState(name ? name : "");
 
@@ -23,9 +22,11 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
 
     const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, loading: { setIsLoading }, func: { catchError } } = useContext(interfaceContext) as TInterfaceContext;
 
-    const handleButton = async (successAction: (vBoardName: string) => Promise<void>) => {
-        setIsLoading(true);
+    const addBoard = useBoardMutation(setIsLoading, catchError).add(setBoardsList);
 
+    const renameBoard = useBoardMutation(setIsLoading, catchError).rename(setBoardsList);
+
+    const handleButton = async (successAction: (vBoardName: string) => Promise<void>) => {
         const vBoardName = validateBoardName(boardName);
 
         if (!vBoardName) {
@@ -33,49 +34,23 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, index,  type}) => {
             return;
         };
 
-        try {
-            const checkBoardsList = await GeneralService.getBoardsList("check");
-
-            if (!checkOrigin(vBoardName, checkBoardsList)) setError({ isError: true, message: "Доска с подобным именем уже существует" });
-            else if (boardsList !== "loading" && !error.isError) {
-                await successAction(vBoardName);
-            };
-
-            setIsLoading(false);
-        } catch (e) {
-            catchError(getErrorMessage(e), errorsPS.addBoard);
+        if (!checkOrigin(vBoardName, boardsList as BoardNameAndId[])) setError({ isError: true, message: "Доска с подобным именем уже существует" });
+        else if (!error.isError) {
+            await successAction(vBoardName);
         };
     };
 
     const addBoardSuccessAction = async (vBoardName: string) => {
-        try {
-            setActiveModal(null);
+        setActiveModal(null);
 
-            const board = { name: vBoardName, id: Date.now(), settings: { grid: true }, components: [] };
-            await GeneralService.addBoard(board);
-
-            setBoardsList([...(boardsList as BoardNameAndId[]), board]);
-        } catch (e) {
-            throw e;
-        };
+        const board = { name: vBoardName, id: getId(), settings: { grid: true }, components: [] };
+        addBoard.mutate({ board: board });
     };
 
     const renameBoardSuccessAction = async (vBoardName: string) => {
-        try {
-            setActiveModal(null);
+        setActiveModal(null);
 
-            await GeneralService.renameBoard(boardId as number, vBoardName);
-
-            const newBoardsList = [...(boardsList as BoardNameAndId[])];
-
-            newBoardsList.splice(index as number, 1);
-
-            newBoardsList.push({ id: boardId as number, name: vBoardName });
-
-            setBoardsList(newBoardsList);
-        } catch (e) {
-            throw e;
-        };
+        renameBoard.mutate({boardId: boardId as number, name: vBoardName});
     };
 
     const changeBoardName = (newBoardName: string) => {

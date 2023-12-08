@@ -10,9 +10,9 @@ const Grid: FC = () => {
   const sizeRect = 20;
   const gridColor = 0xCCCCCC;
 
-  const { data: { scroll, windowSize } } = useContext(canvasContext) as TCanvasContext;
+  const { data: { scroll } } = useContext(canvasContext) as TCanvasContext;
 
-  const drawGrid = (g: TGraphics) => {
+  const drawGrid = useCallback((g: TGraphics) => {
     g.clear();
     g.lineStyle(1, gridColor, 1);
 
@@ -38,7 +38,7 @@ const Grid: FC = () => {
       g.moveTo(X, minY);
       g.lineTo(X, maxY);
     };
-  };
+  }, [scroll.x, scroll.y]);
 
   return (
     <Graphics draw={drawGrid} />

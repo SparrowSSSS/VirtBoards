@@ -1,5 +1,6 @@
 import localStorages from "../config/localStorages";
 import { BoardData, BoardNameAndId } from "../config/types";
+import checkOrigin from "../utils/checkOrigin";
 import getErrorMessage from "../utils/getErrorMessage";
 import BridgeStorage from "./bridgeServices";
 import IndexedDB from "./indexedService";
@@ -30,13 +31,17 @@ class GeneralService {
         try {
             const boardsList = await this.getBoardsList("check");
 
-            const boardName: BoardNameAndId = {name: board.name, id: board.id};
+            const boardNameAndId: BoardNameAndId = {name: board.name, id: board.id};
 
-            const newBoardsList = [...boardsList, boardName];
+            if (!(boardsList.length < 3) || !checkOrigin(boardNameAndId.name, boardsList)) throw new Error("Рекомендуем перезагрузить страницу с приложением");
+
+            const newBoardsList = [...boardsList, boardNameAndId];
 
             await Promise.all([BridgeStorage.addBoard(board, newBoardsList), IndexedDB.addBoard(board)]);
 
             localStorage.setItem(localStorages.boards, JSON.stringify(newBoardsList));
+
+            return newBoardsList;
         } catch (e) {
             throw e;
         };
@@ -53,6 +58,8 @@ class GeneralService {
             await Promise.all([BridgeStorage.deleteBoard(boardId, boardsList), IndexedDB.deleteBoard(boardId)]);
 
             localStorage.setItem(localStorages.boards, JSON.stringify(boardsList));
+
+            return boardsList;
         } catch (e) {
             throw e;
         };
@@ -61,6 +68,8 @@ class GeneralService {
     static renameBoard = async (boardId: number, newBoardName: string) => {
         try {
             const boardsList = await this.getBoardsList("check");
+
+            if (!checkOrigin(newBoardName, boardsList)) throw new Error("Рекомендуем перезагрузить страницу с приложением");
 
             const index = boardsList.findIndex(b => b.id === boardId);
 
@@ -71,6 +80,8 @@ class GeneralService {
             await Promise.all([BridgeStorage.renameBoard(boardsList, newBoard), IndexedDB.renameBoard(newBoard)]);
 
             localStorage.setItem(localStorages.boards, JSON.stringify(boardsList));
+
+            return boardsList;
         } catch (e) {
             throw e;
         };

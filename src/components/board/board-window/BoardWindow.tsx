@@ -17,7 +17,7 @@ const BoardWindow: FC = () => {
         if (boardWindow) {
             setBoardWindow(boardWindow);
 
-            if ((boardData?.components.length as number) === 0) {
+            if (boardData.components.length === 0) {
                 boardWindow.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
             };
         };

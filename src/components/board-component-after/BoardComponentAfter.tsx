@@ -9,8 +9,8 @@ import styles from "./BoardComponentAfter.module.css";
 import getErrorMessage from '../../utils/getErrorMessage';
 import errorsPS from '../../config/errorsPS';
 import ErrorPopout from '../../popouts/ErrorPopout';
-import IndexedDB from '../../services/indexedService';
 import loadFromUrl from "./loadFromURL";
+import GeneralService from '../../services/generalServices';
 
 interface Props {
   board: BoardNameAndId
@@ -31,7 +31,7 @@ export const BoardComponentActions: FC<Props> = ({ board }) => {
     e.stopPropagation();
 
     try {
-      const boardData = await IndexedDB.getBoardData(boardId);
+      const boardData = await GeneralService.getBoardData(boardId);
       loadFromUrl(boardData, platform);
     } catch (error) {
       setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />);

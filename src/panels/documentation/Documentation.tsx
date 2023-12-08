@@ -1,7 +1,6 @@
 import { Panel, PanelHeader, PanelHeaderBack, Platform, usePlatform } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
 import panels from '../../config/panels';
-import localStorages from '../../config/localStorages';
 import { interfaceContext } from '../Panels';
 import { TInterfaceContext } from '../../config/types';
 
@@ -16,7 +15,6 @@ export const Documentation: FC<Props> = ({ id }) => {
     const {panels: {setActivePanel}} = useContext(interfaceContext) as TInterfaceContext;
 
     const goBack = (nextPanel: string) => {
-        localStorage.setItem(localStorages.activePanel, nextPanel);
         setActivePanel(nextPanel);
     };
 

@@ -4,12 +4,11 @@ import { TInterfaceContext } from "../../config/types";
 import BoardsList from "../../components/board-list/BoardsList";
 import { interfaceContext } from "../Panels";
 import panels from "../../config/panels";
-import localStorages from "../../config/localStorages";
-import getErrorMessage from "../../utils/getErrorMessage";
 import errorsPS from "../../config/errorsPS";
 import BridgeStorage from "../../services/bridgeServices";
-import ErrorPopout from "../../popouts/ErrorPopout";
 import GeneralService from "../../services/generalServices";
+import { useQuery } from "@tanstack/react-query";
+import queryTags from "../../config/queryTags";
 
 interface Props {
   id: string
@@ -17,17 +16,22 @@ interface Props {
 
 const Home: FC<Props> = ({ id }) => {
 
-  const { boards: { setBoardsList }, panels: { setActivePanel }, user: { setUserName, userName }, popouts: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
+  const { func: { catchError }, boards: { setBoardsList }, panels: { setActivePanel }, user: { userName, setUserName } } = useContext(interfaceContext) as TInterfaceContext;
 
   const go = (nextPanel: string) => {
-    localStorage.setItem(localStorages.activePanel, nextPanel);
     setActivePanel(nextPanel);
   };
 
+  const name = useQuery({ queryKey: [queryTags.userName], queryFn: () => BridgeStorage.getUserName() });
+  if (name.error) catchError(name.error, errorsPS.getUserName);
+
+  const boardsList = useQuery({ queryKey: [queryTags.boardsList], queryFn: () => GeneralService.getBoardsList("init") });
+  if (boardsList.error) catchError(boardsList.error, errorsPS.getBoardsList);
+
   useEffect(() => {
-    GeneralService.getBoardsList("init").then(boardsList => setBoardsList(boardsList), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardsList} />));
-    BridgeStorage.getUserName().then(name => setUserName(name), error => setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getUserName} />));
-  }, []);
+    if (name.data) setUserName(name.data);
+    if (boardsList.data) setBoardsList(boardsList.data);
+  }, [name.data, boardsList.data]);
 
   return (
     <Panel id={id}>

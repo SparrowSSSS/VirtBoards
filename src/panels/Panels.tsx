@@ -2,20 +2,20 @@ import { SplitCol, SplitLayout, View } from "@vkontakte/vkui";
 import { useState, ReactNode, createContext } from "react";
 import panels from "../config/panels";
 import Modals from "../modals/Modals";
-import localStorages from "../config/localStorages";
-import { BoardNameAndId, TInterfaceContext, TModal } from "../config/types";
+import { BoardNameAndId, TCatchError, TInterfaceContext, TModal } from "../config/types";
 import styles from "./Panels.module.css"
 import ErrorPopout from "../popouts/ErrorPopout";
 import Home from "./home/Home";
 import Documentation from "./documentation/Documentation";
 import BoardPanel from "./board-panel/BoardPanel";
 import getErrorMessage from "../utils/getErrorMessage";
+import useBoard from "../hooks/useBoardMutation";
 
 export const interfaceContext = createContext<TInterfaceContext | undefined>(undefined);
 
 const Panels = () => {
 
-  const [activePanel, setActivePanel] = useState(localStorage.getItem(localStorages.activePanel) || panels.home);
+  const [activePanel, setActivePanel] = useState(panels.home);
   const [activeModal, setActiveModal] = useState<TModal | null>(null);
   const [popout, setPopout] = useState<ReactNode | null>(null);
   const [boardsList, setBoardsList] = useState<BoardNameAndId[] | "loading">("loading");
@@ -23,8 +23,7 @@ const Panels = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
 
-  const catchError = (error: any, ps: string) => {
-    setIsLoading(false);
+  const catchError: TCatchError = (error, ps) => {
     setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={ps} />);
   };
 

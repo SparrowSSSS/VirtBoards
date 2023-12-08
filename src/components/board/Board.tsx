@@ -1,4 +1,4 @@
-import { FC, createContext, SetStateAction, useState, CSSProperties, useEffect, WheelEvent } from 'react';
+import { FC, createContext, SetStateAction, useState, CSSProperties, useEffect, useMemo, useRef } from 'react';
 import styles from "./Board.module.css";
 import { BoardData, TBoardContext, TModal, TTool } from '../../config/types';
 import BoardModal from './board-modals/BoardModal';
@@ -6,15 +6,15 @@ import { SplitLayout } from '@vkontakte/vkui';
 import ControlInterface from './control-interface/ControlInterface';
 import BoardWindow from './board-window/BoardWindow';
 import cursors from '../../config/cursors';
-import addBoardEvents from './boartContainerEvents';
 import BoardEvents from './boartContainerEvents';
+import globalConfig from '../../config/global';
+import useBoardData from '../../hooks/useBoardData';
 
 export const boardContext = createContext<TBoardContext | undefined>(undefined);
 
 interface Props {
     fullScreenBoard: boolean,
-    boardData?: BoardData,
-    setBoardData: (value: SetStateAction<BoardData | undefined>) => void
+    data: BoardData,
     setFullScreenBoard: (value: SetStateAction<boolean>) => void
 };
 
@@ -26,9 +26,11 @@ const boardContainerStyles: CSSProperties = {
     margin: "15px auto"
 }
 
-export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenBoard, boardData }) => {
+export const Board: FC<Props> = ({ fullScreenBoard, setFullScreenBoard, data }) => {
 
     const [boardModal, setBoardModal] = useState<TModal | null>(null);
+
+    const [boardData, setBoardData] = useState<BoardData>(data);
 
     const [activeTool, setActiveTool] = useState<TTool>("cursor");
 
@@ -36,13 +38,31 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
 
     const [boardWindow, setBoardWindow] = useState<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        const boardContainer = document.querySelector(`.${styles.boardContainer}`) as HTMLDivElement;
+    const [mouseDown, setMouseDown] = useState(false);
 
-        if (boardContainer && boardWindow) {
-            new BoardEvents(boardWindow, boardContainer, setActiveCursor).addEvents();
+    const [updateInterval, setUpdateInterval] = useState<NodeJS.Timeout | null>(null);
+
+    const boardContainerRef = useRef<HTMLDivElement | null>(null);
+
+    const boardEvents = useMemo(() => new BoardEvents(boardWindow, setActiveCursor), [boardWindow]);
+
+    const updateBoardData = useBoardData().mutation;
+
+    useEffect(() => {
+        if (boardContainerRef.current && boardWindow) {
+            boardContainerRef.current.addEventListener("wheel", e => e.preventDefault());
         };
-    }, [boardWindow]);
+    }, [boardContainerRef, boardWindow]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            updateBoardData.mutate(boardData);
+        }, globalConfig.updateBoardDataInterval);
+
+        if (updateInterval) clearInterval(updateInterval);
+
+        setUpdateInterval(interval);
+    }, [boardData]);
 
     const boardContextValue: TBoardContext = {
         modals: {
@@ -73,11 +93,24 @@ export const Board: FC<Props> = ({ fullScreenBoard, setBoardData, setFullScreenB
         window: {
             boardWindow,
             setBoardWindow
+        },
+
+        events: {
+            down: { mouseDown, setMouseDown }
         }
     };
 
     return (
-        <div className={styles.boardContainer} style={boardContainerStyles} >
+        <div
+            className={styles.boardContainer}
+            style={boardContainerStyles}
+            onMouseDown={e => boardEvents.onMouseDown(e, activeCursor, mouseDown)}
+            onMouseMove={boardEvents.mouseMove}
+            onMouseUp={boardEvents.mouseOut}
+            onMouseOut={boardEvents.mouseOut}
+            onWheel={e => boardEvents.onWheel(e, mouseDown, activeTool)}
+            ref={boardContainerRef}
+        >
             <boardContext.Provider value={boardContextValue}>
                 <BoardWindow />
                 <div className={styles.modalInterface}>

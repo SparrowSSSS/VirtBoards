@@ -1,4 +1,4 @@
-import { MouseEvent, SetStateAction, ReactNode } from "react";
+import { SetStateAction, ReactNode } from "react";
 
 export type BoardNameAndId = {
     name: string,
@@ -25,42 +25,44 @@ export type onClickRemoveBoard = (i: number) => void;
 export type TModal = {
     id: string,
     modal: ReactNode
-}
+};
+
+export type setStateF<T> = (value: SetStateAction<T>) => void;
 
 export type TInterfaceContext = {
     panels: {
         activePanel: string,
-        setActivePanel: (value: SetStateAction<string>) => void
+        setActivePanel: setStateF<string>
     },
 
     modals: {
         activeModal: TModal | null,
-        setActiveModal: (value: SetStateAction<TModal | null>) => void
+        setActiveModal: setStateF<TModal | null>
     },
 
     popouts: {
         popout: ReactNode,
-        setPopout: (value: SetStateAction<ReactNode>) => void
+        setPopout: setStateF<ReactNode>
     },
 
     boards: {
         boardsList: BoardNameAndId[] | "loading",
-        setBoardsList: (value: SetStateAction<BoardNameAndId[] | "loading">) => void
+        setBoardsList: setStateF<BoardNameAndId[] | "loading">
     },
 
     user: {
         userName: string,
-        setUserName: (value: SetStateAction<string>) => void
+        setUserName: setStateF<string>
     },
 
     snackbars: {
         snackbar: ReactNode | null,
-        setSnackbar: (value: SetStateAction<ReactNode | null>) => void
+        setSnackbar: setStateF<ReactNode | null>
     },
 
     loading: {
         isLoading: boolean,
-        setIsLoading: (value: SetStateAction<boolean>) => void
+        setIsLoading: setStateF<boolean>
     },
 
     func: {
@@ -73,32 +75,39 @@ export type TTool = "cursor" | "pencil" | "eraser";
 export type TBoardContext = {
     fullscreen: {
         fullScreenBoard: boolean,
-        setFullScreenBoard: (value: SetStateAction<boolean>) => void
+        setFullScreenBoard: setStateF<boolean>
     },
 
     modals: {
         boardModal: TModal | null,
-        setBoardModal: (value: SetStateAction<TModal | null>) => void
+        setBoardModal: setStateF<TModal | null>
     },
 
     data: {
-        boardData?: BoardData,
-        setBoardData: (value: SetStateAction<BoardData | undefined>) => void
+        boardData: BoardData,
+        setBoardData: setStateF<BoardData>
     },
 
     tools: {
         activeTool: TTool,
-        setActiveTool: (value: SetStateAction<TTool>) => void
+        setActiveTool: setStateF<TTool>
     },
 
     cursor: {
         activeCursor: string,
-        setActiveCursor: (value: SetStateAction<string>) => void
+        setActiveCursor: setStateF<string>
     },
 
     window: {
         boardWindow: HTMLDivElement | null,
-        setBoardWindow: (value: SetStateAction<HTMLDivElement | null>) => void
+        setBoardWindow: setStateF<HTMLDivElement | null>
+    },
+
+    events: {
+        down: {
+            mouseDown: boolean,
+            setMouseDown: setStateF<boolean>
+        }
     }
 };
 
@@ -109,10 +118,12 @@ export type TStateDataCanvas = {
     },
 
     windowSize: {
-        width: number,
-        height: number
+        x: number,
+        y: number
     }
-}
+};
+
+export type TCatchError = (error: any, ps: string) => void;
 
 export type TCanvasContext = {
     data: TStateDataCanvas

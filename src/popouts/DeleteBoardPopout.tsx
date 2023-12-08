@@ -1,10 +1,8 @@
 import { Alert } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
-import errorsPS from '../config/errorsPS';
 import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../config/types';
+import useBoardMutation from '../hooks/useBoardMutation';
 import { interfaceContext } from '../panels/Panels';
-import GeneralService from '../services/generalServices';
-import getErrorMessage from '../utils/getErrorMessage';
 
 interface Props {
   boardId: number,
@@ -13,28 +11,12 @@ interface Props {
 
 const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
 
-  const { popouts: { setPopout }, boards: { boardsList, setBoardsList }, loading: { setIsLoading }, func: {catchError} } = useContext(interfaceContext) as TInterfaceContext;
+  const { popouts: { setPopout }, boards: { setBoardsList }, loading: { setIsLoading }, func: { catchError } } = useContext(interfaceContext) as TInterfaceContext;
+
+  const deleteBoard = useBoardMutation(setIsLoading, catchError).delete(setBoardsList);
 
   const removeBoard: onClickRemoveBoard = async (boardId) => {
-    setIsLoading(true);
-
-    try {
-      await GeneralService.deleteBoard(boardId);
-
-      const list = [...(boardsList as BoardNameAndId[])];
-
-      list.find((board, i) => {
-        if (board.id === boardId) {
-          list.splice(i, 1);
-          return true;
-        };
-      });
-
-      setIsLoading(false);
-      setBoardsList(list);
-    } catch (e) {
-      catchError(getErrorMessage(e), errorsPS.deleteBoard);
-    };
+    deleteBoard.mutate({ boardId: boardId });
   };
 
   return (

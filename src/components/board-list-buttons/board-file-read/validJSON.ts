@@ -1,12 +1,16 @@
 import { BoardData } from "../../../config/types";
 
 const validJSON = (jsonText: string): boolean => {
-    const r = JSON.parse(jsonText) as BoardData;
+    try {
+        const r = JSON.parse(jsonText) as BoardData;
 
-    if (r.components && r.id && r.settings && r.name) {
-        return true;
-    } else {
-        return false;
+        if (r.components && r.settings && r.name) {
+            return true;
+        } else {
+            return false;
+        };
+    } catch (e) {
+        throw e;
     };
 };
 

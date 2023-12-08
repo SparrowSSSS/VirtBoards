@@ -1,5 +1,4 @@
 const localStorages = {
-    activePanel: "activePanel",
     activeBoard: "activeBoard",
     boards: "boardNames"
 };

@@ -21,7 +21,6 @@ const BoardsListComponent: FC<Props> = ({ board, index }) => {
 
     const boardClick = (board: BoardNameAndId) => {
         localStorage.setItem(localStorages.activeBoard, String(board.id));
-        localStorage.setItem(localStorages.activePanel, panels.board)
         setActivePanel(panels.board);
     };
 
