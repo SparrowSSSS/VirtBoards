@@ -1,8 +1,7 @@
 import { Panel, PanelHeader, PanelHeaderBack, Platform, usePlatform } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
 import panels from '../../config/panels';
-import { interfaceContext } from '../Panels';
-import { TInterfaceContext } from '../../config/types';
+import { useInterfaceActions } from '../../hooks/useActions';
 
 interface Props {
     id: string
@@ -12,10 +11,10 @@ export const Documentation: FC<Props> = ({ id }) => {
 
     const platform = usePlatform();
 
-    const {panels: {setActivePanel}} = useContext(interfaceContext) as TInterfaceContext;
+    const {setPanel} = useInterfaceActions();
 
     const goBack = (nextPanel: string) => {
-        setActivePanel(nextPanel);
+        setPanel(nextPanel);
     };
 
     return (

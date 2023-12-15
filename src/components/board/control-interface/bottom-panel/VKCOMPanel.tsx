@@ -1,9 +1,10 @@
 import { Icon24Fullscreen, Icon24FullscreenExit, Icon24Settings } from '@vkontakte/icons';
-import { FC, useContext } from 'react';
-import { BoardData, TBoardContext } from '../../../../config/types';
-import { boardContext } from '../../Board';
-import { boardModals } from '../../board-modals/BoardModal';
-import SettingModal from '../../board-modals/setting-modal/SettingModal';
+import { FC } from 'react';
+import { BoardData } from '../../../../config/types';
+import { useBoardActions } from '../../../../hooks/useActions';
+import { useBoardSelector } from '../../../../hooks/useStoreSelector';
+import { boardModals } from '../../../../modals/BoardModals';
+import SettingModal from '../../../../modals/SettingModal';
 import styles from "./BoardBottomPanel.module.css";
 import { boardBottomPanel, boardBottomPanelFullScreen } from './bottomPanelStyle';
 
@@ -14,7 +15,9 @@ interface Props {
 
 const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
 
-    const { data: {boardData}, fullscreen: {fullScreenBoard}, modals: {setBoardModal} } = useContext(boardContext) as TBoardContext;
+    const { fullscreen, boardData } = useBoardSelector();
+
+    const { setModal } = useBoardActions();
 
     const valBoardName = (name: string): string => {
         return name.length <= 11 ? name : name.slice(0, 11) + "...";
@@ -22,7 +25,7 @@ const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
 
     return (
         <>
-            {!fullScreenBoard
+            {!fullscreen
                 ? (
                     <div className={styles.boardBottomPanel} style={boardBottomPanel}>
                         <div className={styles.bottomPanelButton} onClick={() => onFullScreen()}>
@@ -34,7 +37,7 @@ const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
                     <div className={`${styles.boardBottomPanel} ${styles.boardBottomPanelFullScreen}`} style={boardBottomPanelFullScreen}>
                         <div style={{ color: "#222222", fontWeight: "bold" }}>{valBoardName((boardData as BoardData).name)}</div>
                         <div style={{ display: "flex" }}>
-                            <div className={styles.bottomPanelButton} style={{ marginRight: "15px" }} onClick={() => setBoardModal({id: boardModals.settingsModal, modal: <SettingModal />})}>
+                            <div className={styles.bottomPanelButton} style={{ marginRight: "15px" }} onClick={() => setModal({ id: boardModals.settingsModal, modal: <SettingModal /> })}>
                                 <Icon24Settings className={`${styles.boardIcon}`}></Icon24Settings>
                             </div>
                             <div onClick={() => offFullScreen()} className={styles.bottomPanelButton} >

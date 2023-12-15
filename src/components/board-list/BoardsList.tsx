@@ -1,19 +1,35 @@
 import { Group, Header, List, Placeholder, Spinner } from '@vkontakte/vkui';
-import { FC, useContext } from 'react';
-import { TInterfaceContext } from '../../config/types';
-import { interfaceContext } from '../../panels/Panels';
+import { FC, useEffect } from 'react';
 import BoardsListComponent from '../board-list-component/BoardsListComponent';
 import BoardListButtons from '../board-list-buttons/BoardListButtons';
+import { useQuery } from '@tanstack/react-query';
+import GeneralService from '../../services/generalServices';
+import { useCatchInterfaceError } from '../../hooks/useCatchError';
+import queryTags from '../../config/queryTags';
+import errorsPS from '../../config/errorsPS';
+import { useInterfaceActions } from '../../hooks/useActions';
+import { useInterfaceSelector } from '../../hooks/useStoreSelector';
 
 export const BoardsList: FC = () => {
 
-    const { boards: { boardsList } } = useContext(interfaceContext) as TInterfaceContext;
+    const catchError = useCatchInterfaceError();
+
+    const { setBoardsList } = useInterfaceActions();
+
+    const { boardsList } = useInterfaceSelector();
+
+    const bl = useQuery({ queryKey: [queryTags.boardsList], queryFn: () => GeneralService.getBoardsList("init") });
+    if (bl.error) catchError(bl.error, errorsPS.getBoardsList);
+
+    useEffect(() => {
+        if (bl.data) setBoardsList(bl.data);
+    }, [bl.data]);
 
     return (
         <>
             <Group header={<Header mode="primary">Доски</Header>}>
                 {
-                    boardsList === "loading" ? (<Spinner size="medium" style={{ paddingBottom: "20px" }}></Spinner>)
+                    !bl.data ? (<Spinner size="medium" style={{ paddingBottom: "20px" }}></Spinner>)
 
                         : boardsList.length > 0
                             ? (

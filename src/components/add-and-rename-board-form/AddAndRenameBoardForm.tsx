@@ -1,11 +1,12 @@
 import { Button, FormItem, FormLayout, Input } from "@vkontakte/vkui";
 import { FC, useContext, useState } from "react";
-import { interfaceContext } from "../../panels/Panels";
-import { BoardNameAndId, TInterfaceContext } from "../../config/types";
+import { BoardNameAndId } from "../../config/types";
 import checkOrigin from "../../utils/checkOrigin";
 import validateBoardName from "../../utils/validateBoardName";
 import useBoardMutation from "../../hooks/useBoardMutation";
 import getId from "../../utils/getId";
+import { useInterfaceActions } from "../../hooks/useActions";
+import { useInterfaceSelector } from "../../hooks/useStoreSelector";
 
 interface Props {
     type: "rename" | "add",
@@ -20,11 +21,12 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, type }) => {
 
     const [error, setError] = useState<{ isError: boolean, message: string }>({ isError: false, message: "" });
 
-    const { modals: { setActiveModal }, boards: { boardsList, setBoardsList }, loading: { setIsLoading }, func: { catchError } } = useContext(interfaceContext) as TInterfaceContext;
+    const { setBoardsList, setModal } = useInterfaceActions();
+    const { boardsList } = useInterfaceSelector();
 
-    const addBoard = useBoardMutation(setIsLoading, catchError).add(setBoardsList);
+    const addBoard = useBoardMutation().add(setBoardsList);
 
-    const renameBoard = useBoardMutation(setIsLoading, catchError).rename(setBoardsList);
+    const renameBoard = useBoardMutation().rename(setBoardsList);
 
     const handleButton = async (successAction: (vBoardName: string) => Promise<void>) => {
         const vBoardName = validateBoardName(boardName);
@@ -41,16 +43,16 @@ const AddAndRenameBoardForm: FC<Props> = ({ boardId, name, type }) => {
     };
 
     const addBoardSuccessAction = async (vBoardName: string) => {
-        setActiveModal(null);
+        setModal(null);
 
         const board = { name: vBoardName, id: getId(), settings: { grid: true }, components: [] };
         addBoard.mutate({ board: board });
     };
 
     const renameBoardSuccessAction = async (vBoardName: string) => {
-        setActiveModal(null);
+        setModal(null);
 
-        renameBoard.mutate({boardId: boardId as number, name: vBoardName});
+        renameBoard.mutate({ boardId: boardId as number, name: vBoardName });
     };
 
     const changeBoardName = (newBoardName: string) => {

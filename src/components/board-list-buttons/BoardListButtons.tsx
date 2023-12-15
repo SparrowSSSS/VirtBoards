@@ -1,27 +1,26 @@
 import { Icon24Add } from '@vkontakte/icons';
 import { Button, ButtonGroup, Platform, usePlatform } from '@vkontakte/vkui';
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import globalConfig from '../../config/global';
-import { TInterfaceContext } from '../../config/types';
+import { useInterfaceActions } from '../../hooks/useActions';
+import { useInterfaceSelector } from '../../hooks/useStoreSelector';
 import AddBoardModal from '../../modals/AddBoardModal';
 import { modals } from '../../modals/Modals';
-import { interfaceContext } from '../../panels/Panels';
 import BoardLimitSnackbar from '../../snackbars/BoardLimitSnackbar';
 import BoardFileRead from './board-file-read/BoardFileRead';
 
 const BoardListButtons: FC = () => {
 
-    const { modals: { setActiveModal }, boards: { boardsList }, snackbars: { setSnackbar } } = useContext(interfaceContext) as TInterfaceContext;
-
     const platform = usePlatform();
 
+    const { boardsList } = useInterfaceSelector();
+    const { setModal, setSnackbar } = useInterfaceActions();
+
     const handleAddBoardButtonClick = async () => {
-        if (boardsList !== "loading") {
-            if (boardsList.length < globalConfig.maxBoards) {
-                setActiveModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });
-            } else {
-                setSnackbar(<BoardLimitSnackbar subtitle={`Максимальное количество доступных досок - ${globalConfig.maxBoards}`} />);
-            };
+        if (boardsList.length < globalConfig.maxBoards) {
+            setModal({ id: modals.addBoardModal, modal: <AddBoardModal /> });
+        } else {
+            setSnackbar(<BoardLimitSnackbar subtitle={`Максимальное количество доступных досок - ${globalConfig.maxBoards}`} />);
         };
     };
 

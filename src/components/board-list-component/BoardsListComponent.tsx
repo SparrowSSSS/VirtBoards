@@ -1,14 +1,14 @@
 import { Cell } from '@vkontakte/vkui';
-import { FC, MouseEvent, useContext } from 'react';
+import { FC, MouseEvent } from 'react';
 import localStorages from '../../config/localStorages';
 import panels from '../../config/panels';
-import { interfaceContext } from '../../panels/Panels';
-import { BoardNameAndId, TInterfaceContext } from '../../config/types';
+import { BoardNameAndId } from '../../config/types';
 import BoardComponentActions from '../board-component-after/BoardComponentAfter';
 import { Icon28EditOutline } from '@vkontakte/icons';
 import styles from "./BoardsListComponent.module.css"
 import { modals } from '../../modals/Modals';
 import RenameBoardModal from '../../modals/RenameBoardModal';
+import { useInterfaceActions } from '../../hooks/useActions';
 
 interface Props {
     board: BoardNameAndId,
@@ -17,17 +17,17 @@ interface Props {
 
 const BoardsListComponent: FC<Props> = ({ board, index }) => {
 
-    const { panels: { setActivePanel }, modals: {setActiveModal} } = useContext(interfaceContext) as TInterfaceContext;
+    const { setPanel, setModal } = useInterfaceActions();
 
     const boardClick = (board: BoardNameAndId) => {
         localStorage.setItem(localStorages.activeBoard, String(board.id));
-        setActivePanel(panels.board);
+        setPanel(panels.board);
     };
 
     const handleRenameBoard = (boardId: number, e: MouseEvent<SVGSVGElement, globalThis.MouseEvent>, boardName: string) => {
         e.stopPropagation();
-        setActiveModal({id: modals.renameBoardModal, modal: <RenameBoardModal boardId={boardId} boardName={boardName} index={index}/>});
-      };
+        setModal({ id: modals.renameBoardModal, modal: <RenameBoardModal boardId={boardId} boardName={boardName} index={index} /> });
+    };
 
     return (
         <Cell
@@ -35,7 +35,7 @@ const BoardsListComponent: FC<Props> = ({ board, index }) => {
             after={<BoardComponentActions board={board} />}
             before={<Icon28EditOutline className={styles.icon} onClick={e => handleRenameBoard(board.id, e, board.name)} />}
         >
-            {board.name} 
+            {board.name}
         </Cell>
     )
 };

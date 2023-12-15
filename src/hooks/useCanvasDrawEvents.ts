@@ -1,7 +1,9 @@
-import { MutableRefObject, MouseEvent, SetStateAction } from "react";
+import { MutableRefObject, MouseEvent, useMemo } from "react";
 import { Application, Container as TContainer, DisplayObject, Graphics, ICanvas } from "pixi.js";
-import { BoardData, setStateF, TTool } from "../../../config/types";
+import { BoardData, TTool } from "../config/types";
 import LZString from "lz-string";
+import { useBoardActions, useEventActions } from "./useActions";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
 type TCoords = { x: number, y: number };
 
@@ -10,17 +12,17 @@ class CanvasDrawEvents {
     currentCoords: TCoords = { x: 0, y: 0 };
     firstCoords: TCoords = { x: 0, y: 0 };
     graph: Graphics | null = null;
-    setMouseDown: setStateF<boolean>;
+    setMouseDown: ActionCreatorWithPayload<boolean, "events/setMouseDown">;
     app: Application<ICanvas> | null;
-    setBoardData: setStateF<BoardData>;
+    setBoardData: ActionCreatorWithPayload<BoardData | null, "board/setBoardData">;
     minX: number = 0;
     minY: number = 0;
 
     constructor(
-        canvasContainerRef: MutableRefObject<TContainer<DisplayObject> | null>, 
-        setMouseDown: setStateF<boolean>, 
+        canvasContainerRef: MutableRefObject<TContainer<DisplayObject> | null>,
+        setMouseDown: ActionCreatorWithPayload<boolean, "events/setMouseDown">,
         app: Application<ICanvas> | null,
-        setBoardData: setStateF<BoardData>
+        setBoardData: ActionCreatorWithPayload<BoardData | null, "board/setBoardData">
     ) {
         this.canvasContainerRef = canvasContainerRef;
         this.setMouseDown = setMouseDown;
@@ -79,7 +81,7 @@ class CanvasDrawEvents {
         if (blob) {
             const compressBlob = LZString.compress(blob);
 
-            const position: TCoords = {x: this.minX, y: this.minY};
+            const position: TCoords = { x: this.minX, y: this.minY };
         };
 
         this.setMouseDown(false);
@@ -88,4 +90,11 @@ class CanvasDrawEvents {
     }
 };
 
-export default CanvasDrawEvents;
+const useCanvasDrawEvents = (canvasContainerRef: MutableRefObject<TContainer<DisplayObject> | null>, app: Application<ICanvas> | null) => {
+    const { setBoardData } = useBoardActions();
+    const { setMouseDown } = useEventActions();
+
+    return useMemo(() => new CanvasDrawEvents(canvasContainerRef, setMouseDown, app, setBoardData), [app]);
+};
+
+export default useCanvasDrawEvents;

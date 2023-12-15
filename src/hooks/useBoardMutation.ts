@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import GeneralService from "../services/generalServices";
-import { BoardData, BoardNameAndId, setStateF, TCatchError } from "../config/types";
+import { BoardData, BoardNameAndId } from "../config/types";
 import errorsPS from "../config/errorsPS";
+import { useInterfaceActions } from "./useActions";
+import { useCatchInterfaceError } from "./useCatchError";
 
 type TCallback = (list: BoardNameAndId[]) => void;
 
@@ -11,7 +13,11 @@ type TDeleteOptions = { boardId: number };
 
 type TAddOptions = { board: BoardData };
 
-const useBoardMutation = (setLoading: setStateF<boolean>, catchError: TCatchError) => {
+const useBoardMutation = () => {
+
+    const setLoading = useInterfaceActions().setLoading;
+
+    const catchError = useCatchInterfaceError();
 
     const deleteBoard = (options: TDeleteOptions) => {
         setLoading(true);
@@ -44,7 +50,7 @@ const useBoardMutation = (setLoading: setStateF<boolean>, catchError: TCatchErro
             return useMutation({
                 mutationFn: (options: TAddOptions) => addBoard(options),
                 onSettled: () => setLoading(false),
-                onError: (error) => catchError(error, errorsPS.deleteBoard),
+                onError: (error) => catchError(error, errorsPS.addBoard),
                 onSuccess: (data) => {
                     if (callback) callback(data);
                 }
@@ -55,7 +61,7 @@ const useBoardMutation = (setLoading: setStateF<boolean>, catchError: TCatchErro
             return useMutation({
                 mutationFn: (options: TRenameOptions) => renameBoard(options),
                 onSettled: () => setLoading(false),
-                onError: (error) => catchError(error, errorsPS.deleteBoard),
+                onError: (error) => catchError(error, errorsPS.renameBoard),
                 onSuccess: (data) => {
                     if (callback) callback(data);
                 }

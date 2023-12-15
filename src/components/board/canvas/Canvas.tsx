@@ -1,21 +1,19 @@
 import "@pixi/events";
 import { Container, Stage } from '@pixi/react';
 import { Application, Container as TContainer, DisplayObject, ICanvas } from "pixi.js";
-import { createContext, FC, useContext, useEffect, useRef, useState, useMemo } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import canvasConfig from '../../../config/canvas';
-import { TBoardContext, TCanvasContext, TStateDataCanvas } from '../../../config/types';
+import { useCanvasActions } from "../../../hooks/useActions";
+import useCanvasDrawEvents from "../../../hooks/useCanvasDrawEvents";
+import { useBoardSelector, useCanvasSelector } from "../../../hooks/useStoreSelector";
 import getCursor from "../../../utils/getBoardCursor";
-import { boardContext } from '../Board';
 import styles from "./Canvas.module.css";
-import CanvasDrawEvents from "./canvasDrawEvents";
 import { checkChanges } from "./canvasUtils";
 import Grid from './grid/Grid';
-
-export const canvasContext = createContext<TCanvasContext | null>(null);
+import { Provider } from "react-redux";
+import store from "../../../app/store";
 
 const Canvas: FC = () => {
-
-    const [stateData, setStateData] = useState<TStateDataCanvas>({ scroll: { x: 0, y: 0 }, windowSize: { x: 0, y: 0 } });
 
     const [render, setRender] = useState<boolean>(false);
 
@@ -23,13 +21,18 @@ const Canvas: FC = () => {
 
     const [app, setApp] = useState<Application<ICanvas> | null>(null);
 
-    const { data: { boardData, setBoardData }, fullscreen: { fullScreenBoard }, cursor: { activeCursor }, window: { boardWindow }, tools: { activeTool }, events: {down: {setMouseDown}} } = useContext(boardContext) as TBoardContext;
+    const { scroll, windowSize } = useCanvasSelector();
 
-    const draw = useMemo(() => new CanvasDrawEvents(canvasContainerRef, setMouseDown, app, setBoardData), [canvasContainerRef, app]);
+    const { setScroll, setWindowSize } = useCanvasActions();
+
+    const { boardWindow, fullscreen, activeCursor, activeTool, boardData } = useBoardSelector();
+
+    const draw = useCanvasDrawEvents(canvasContainerRef, app);
 
     useEffect(() => {
-        if (boardWindow && checkChanges(boardWindow, stateData)) {
-            setStateData({ scroll: { x: boardWindow.scrollLeft, y: boardWindow.scrollTop }, windowSize: { x: boardWindow.clientWidth, y: boardWindow.clientHeight } });
+        if (boardWindow && checkChanges(boardWindow, { scroll, windowSize })) {
+            setScroll({ x: boardWindow.scrollLeft, y: boardWindow.scrollTop });
+            setWindowSize({ w: boardWindow.clientWidth, h: boardWindow.clientHeight });
         };
     }, [render]);
 
@@ -43,24 +46,24 @@ const Canvas: FC = () => {
 
     return (
         <Stage
-            style={{ cursor: getCursor(fullScreenBoard, activeCursor) }}
-            width={stateData.windowSize.x}
-            height={stateData.windowSize.y}
+            style={{ cursor: getCursor(fullscreen, activeCursor) }}
+            width={windowSize.w}
+            height={windowSize.h}
             options={{ backgroundColor: canvasConfig.color }}
             className={styles.boardCanvas}
             raf={false}
             renderOnComponentChange={true}
-            onMouseDown={e => draw.stageDown(e, activeTool, fullScreenBoard)}
+            onMouseDown={e => draw.stageDown(e, activeTool, fullscreen)}
             onMouseMove={draw.stageMove}
             onMouseUp={draw.stageOut}
             onMouseOut={draw.stageOut}
             onMount={setApp}
         >
-            <canvasContext.Provider value={{ data: stateData }}>
+            <Provider store={store}>
                 <Container ref={canvasContainerRef}>
                     {boardData?.settings.grid ? <Grid /> : null}
                 </Container>
-            </canvasContext.Provider>
+            </Provider>
         </Stage>
     )
 };

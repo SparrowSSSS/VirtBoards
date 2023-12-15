@@ -1,15 +1,15 @@
-import { FC, useContext, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import canvasConfig from '../../../config/canvas';
-import cursors from '../../../config/cursors';
 import elementsId from '../../../config/elementsId';
-import { TBoardContext } from '../../../config/types';
-import { boardContext } from '../Board';
+import { useBoardActions } from '../../../hooks/useActions';
+import { useBoardSelector } from '../../../hooks/useStoreSelector';
 import Canvas from '../canvas/Canvas';
 import styles from "./BoardWindow.module.css";
 
 const BoardWindow: FC = () => {
 
-    const {data: {boardData}, window: {setBoardWindow} } = useContext(boardContext) as TBoardContext;
+    const { setBoardWindow } = useBoardActions();
+    const { boardData } = useBoardSelector();
 
     useEffect(() => {
         const boardWindow = document.getElementById(elementsId.boardWindow) as HTMLDivElement;
@@ -17,7 +17,7 @@ const BoardWindow: FC = () => {
         if (boardWindow) {
             setBoardWindow(boardWindow);
 
-            if (boardData.components.length === 0) {
+            if (boardData?.components.length === 0) {
                 boardWindow.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
             };
         };

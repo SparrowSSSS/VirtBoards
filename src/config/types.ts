@@ -29,102 +29,39 @@ export type TModal = {
 
 export type setStateF<T> = (value: SetStateAction<T>) => void;
 
-export type TInterfaceContext = {
-    panels: {
-        activePanel: string,
-        setActivePanel: setStateF<string>
-    },
+export type TScroll = { x: number, y: number };
 
-    modals: {
-        activeModal: TModal | null,
-        setActiveModal: setStateF<TModal | null>
-    },
+export type TWindowSize = { w: number, h: number };
 
-    popouts: {
-        popout: ReactNode,
-        setPopout: setStateF<ReactNode>
-    },
+export type TInterfaceOptions = {
+    activePanel: string,
+    activeModal: TModal | null,
+    popout: ReactNode | null,
+    boardsList: BoardNameAndId[],
+    userName: string,
+    snackbar: ReactNode | null,
+    isLoading: boolean
+};
 
-    boards: {
-        boardsList: BoardNameAndId[] | "loading",
-        setBoardsList: setStateF<BoardNameAndId[] | "loading">
-    },
+export type TBoardOptions = {
+    fullscreen: boolean,
+    boardData: BoardData | null,
+    activeTool: TTool,
+    activeCursor: string,
+    boardWindow: any,
+    boardModal: TModal | null,
+    boardPopout: ReactNode | null
+};
 
-    user: {
-        userName: string,
-        setUserName: setStateF<string>
-    },
+export type TCanvasOptions = {
+    scroll: TScroll,
+    windowSize: TWindowSize
+};
 
-    snackbars: {
-        snackbar: ReactNode | null,
-        setSnackbar: setStateF<ReactNode | null>
-    },
-
-    loading: {
-        isLoading: boolean,
-        setIsLoading: setStateF<boolean>
-    },
-
-    func: {
-        catchError: (error: any, ps: string) => void
-    }
+export type TEventOptions = {
+    mouseDown: boolean
 };
 
 export type TTool = "cursor" | "pencil" | "eraser";
 
-export type TBoardContext = {
-    fullscreen: {
-        fullScreenBoard: boolean,
-        setFullScreenBoard: setStateF<boolean>
-    },
-
-    modals: {
-        boardModal: TModal | null,
-        setBoardModal: setStateF<TModal | null>
-    },
-
-    data: {
-        boardData: BoardData,
-        setBoardData: setStateF<BoardData>
-    },
-
-    tools: {
-        activeTool: TTool,
-        setActiveTool: setStateF<TTool>
-    },
-
-    cursor: {
-        activeCursor: string,
-        setActiveCursor: setStateF<string>
-    },
-
-    window: {
-        boardWindow: HTMLDivElement | null,
-        setBoardWindow: setStateF<HTMLDivElement | null>
-    },
-
-    events: {
-        down: {
-            mouseDown: boolean,
-            setMouseDown: setStateF<boolean>
-        }
-    }
-};
-
-export type TStateDataCanvas = {
-    scroll: {
-        x: number,
-        y: number
-    },
-
-    windowSize: {
-        x: number,
-        y: number
-    }
-};
-
 export type TCatchError = (error: any, ps: string) => void;
-
-export type TCanvasContext = {
-    data: TStateDataCanvas
-};

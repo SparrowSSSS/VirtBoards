@@ -1,14 +1,17 @@
 import { Button, ButtonGroup, Checkbox, FormLayout, FormItem } from '@vkontakte/vkui';
-import { FC, useContext, useState } from 'react'
-import { TBoardContext, TSettings } from '../../../../config/types';
-import { boardContext } from '../../Board';
-import getErrorMessage from '../../../../utils/getErrorMessage';
-import IndexedDB from '../../../../services/indexedService';
+import { FC, useState } from 'react'
+import { TSettings } from '../config/types';
+import { useBoardSelector } from '../hooks/useStoreSelector';
+import { useBoardActions } from '../hooks/useActions';
+import useBoardData from '../hooks/useBoardData';
 
 
 export const SettingModal: FC = () => {
 
-    const { data: { boardData, setBoardData } } = useContext(boardContext) as TBoardContext;
+    const { boardData } = useBoardSelector();
+    const { setBoardData } = useBoardActions();
+
+    const updateBoardData = useBoardData().updateIndex;
 
     const [firstOptions, setFirstOptions] = useState<TSettings>({ ...boardData?.settings });
     const [options, setOptions] = useState<TSettings>(firstOptions);
@@ -23,7 +26,7 @@ export const SettingModal: FC = () => {
             const newBoardData = { ...boardData, settings: options };
             setBoardData(newBoardData);
             setFirstOptions(options);
-            IndexedDB.updateBoardData(newBoardData).catch(error => alert(getErrorMessage(error)));
+            updateBoardData.mutate(newBoardData);
         };
     };
 

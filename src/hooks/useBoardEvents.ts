@@ -1,11 +1,14 @@
-import { SetStateAction, MouseEvent, WheelEvent } from "react";
-import cursors from "../../config/cursors";
-import { TTool } from "../../config/types";
+import { TTool } from "../config/types";
+import { WheelEvent, MouseEvent, useMemo } from "react";
+import cursors from "../config/cursors";
+import { useBoardSelector } from "./useStoreSelector";
+import { useBoardActions } from "./useActions";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
 class BoardEvents {
 
     boardWindow: HTMLDivElement | null;
-    setActiveCursor: (value: SetStateAction<string>) => void;
+    setActiveCursor: ActionCreatorWithPayload<string, "board/setActiveCursor">;
 
     wheelK = 150;
     mouseMoveK = 5;
@@ -17,7 +20,7 @@ class BoardEvents {
 
     lastCursor: string;
 
-    constructor(boardWindow: HTMLDivElement | null, setActiveCursor: (value: SetStateAction<string>) => void) {
+    constructor(boardWindow: HTMLDivElement | null, setActiveCursor: ActionCreatorWithPayload<string, "board/setActiveCursor">) {
         this.boardWindow = boardWindow;
         this.setActiveCursor = setActiveCursor;
         this.lastX = 0;
@@ -26,7 +29,7 @@ class BoardEvents {
         this.lastCursor = "default";
     }
 
-    onWheel = (e: WheelEvent<HTMLDivElement>, down: boolean, tool: TTool) => {
+    wheel = (e: WheelEvent<HTMLDivElement>, down: boolean, tool: TTool) => {
         if (!(down && tool === "pencil") && this.boardWindow) {
             let by;
 
@@ -37,7 +40,7 @@ class BoardEvents {
         };
     }
 
-    onMouseDown = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>, activeCursor: string, mouseDown: boolean) => {
+    mouseDown = (e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>, activeCursor: string, mouseDown: boolean) => {
         e.preventDefault();
 
         if (e.button === 1 && this.boardWindow && !mouseDown) {
@@ -78,4 +81,12 @@ class BoardEvents {
     };
 };
 
-export default BoardEvents;
+const useBoardEvents = () => {
+    const { boardWindow } = useBoardSelector();
+
+    const { setActiveCursor } = useBoardActions();
+
+    return useMemo(() => new BoardEvents(boardWindow, setActiveCursor), [boardWindow]);
+};
+
+export default useBoardEvents;

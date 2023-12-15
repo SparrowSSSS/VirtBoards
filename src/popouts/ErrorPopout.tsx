@@ -1,7 +1,6 @@
 import { Alert } from '@vkontakte/vkui';
 import { FC, useContext } from 'react';
-import { TInterfaceContext } from '../config/types';
-import { interfaceContext } from '../panels/Panels';
+import { useInterfaceActions } from '../hooks/useActions';
 
 interface Props {
     message: string,
@@ -10,7 +9,7 @@ interface Props {
 
 const ErrorPopout: FC<Props> = ({ message, errorPS }) => {
 
-    const {popouts: {setPopout}} = useContext(interfaceContext) as TInterfaceContext;
+    const { setPopout } = useInterfaceActions();
 
     return (
         <Alert

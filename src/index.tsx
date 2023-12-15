@@ -1,8 +1,9 @@
 import ReactDOM from "react-dom/client";
 import bridge from "@vkontakte/vk-bridge";
 import App from "./App";
-import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Provider } from "react-redux";
+import store from "./app/store";
 
 bridge.send("VKWebAppInit");
 
@@ -11,19 +12,19 @@ const root = ReactDOM.createRoot(
 );
 
 const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false
-      }
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false
     }
+  }
 });
 
 root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
       <App />
-    </QueryClientProvider>
-  </React.StrictMode>
+    </Provider>
+  </QueryClientProvider>
 );
 
 if (process.env.NODE_ENV === "development") {

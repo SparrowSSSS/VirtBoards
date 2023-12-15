@@ -1,7 +1,7 @@
 import { ModalPage, ModalPageHeader, ModalRoot } from '@vkontakte/vkui';
-import { FC, useContext } from 'react'
-import { TBoardContext } from '../../../config/types';
-import { boardContext } from '../Board';
+import { FC } from 'react'
+import { useBoardActions } from '../hooks/useActions';
+import { useBoardSelector } from '../hooks/useStoreSelector';
 
 export const boardModals = {
     settingsModal: "settings-modal"
@@ -9,14 +9,15 @@ export const boardModals = {
 
 const BoardModal: FC = () => {
 
-    const {modals: {boardModal, setBoardModal}} = useContext(boardContext) as TBoardContext;
+    const { setModal } = useBoardActions();
+    const { boardModal } = useBoardSelector();
 
     return (
         <ModalRoot activeModal={boardModal?.id}>
             <ModalPage
                 id={boardModals.settingsModal}
                 header={<ModalPageHeader>Настройки</ModalPageHeader>}
-                onClose={() => setBoardModal(null)}
+                onClose={() => setModal(null)}
             >
                 {boardModal?.modal}
             </ModalPage>

@@ -1,8 +1,8 @@
 import { Alert } from '@vkontakte/vkui';
 import { FC, useContext } from 'react'
-import { TInterfaceContext, onClickRemoveBoard, BoardNameAndId } from '../config/types';
+import { onClickRemoveBoard } from '../config/types';
+import { useInterfaceActions } from '../hooks/useActions';
 import useBoardMutation from '../hooks/useBoardMutation';
-import { interfaceContext } from '../panels/Panels';
 
 interface Props {
   boardId: number,
@@ -11,9 +11,9 @@ interface Props {
 
 const DeleteBoardPopout: FC<Props> = ({ boardId, boardName }) => {
 
-  const { popouts: { setPopout }, boards: { setBoardsList }, loading: { setIsLoading }, func: { catchError } } = useContext(interfaceContext) as TInterfaceContext;
+  const { setBoardsList, setPopout } = useInterfaceActions();
 
-  const deleteBoard = useBoardMutation(setIsLoading, catchError).delete(setBoardsList);
+  const deleteBoard = useBoardMutation().delete(setBoardsList);
 
   const removeBoard: onClickRemoveBoard = async (boardId) => {
     deleteBoard.mutate({ boardId: boardId });

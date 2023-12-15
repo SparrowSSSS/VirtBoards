@@ -1,16 +1,15 @@
 import { Graphics as TGraphics } from '@pixi/graphics';
 import { Graphics } from '@pixi/react';
-import { FC, useCallback, useContext } from 'react';
+import { FC, useCallback } from 'react';
 import canvasConfig from '../../../../config/canvas';
-import { TCanvasContext } from '../../../../config/types';
-import { canvasContext } from '../Canvas';
+import { useCanvasSelector } from '../../../../hooks/useStoreSelector';
 
 const Grid: FC = () => {
 
   const sizeRect = 20;
   const gridColor = 0xCCCCCC;
 
-  const { data: { scroll } } = useContext(canvasContext) as TCanvasContext;
+  const { scroll } = useCanvasSelector();
 
   const drawGrid = useCallback((g: TGraphics) => {
     g.clear();

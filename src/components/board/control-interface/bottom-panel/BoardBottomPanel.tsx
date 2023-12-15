@@ -1,22 +1,21 @@
-import { FC, useContext} from 'react';
-import { TBoardContext } from '../../../../config/types';
-import { boardContext } from '../../Board';
+import { FC, useContext } from 'react';
 import boardStyles from '../../Board.module.css';
 import { Platform, usePlatform } from '@vkontakte/vkui';
 import NotVKCOMPanel from './NotVKCOMPanel';
 import VKCOMPanel from './VKCOMPanel';
+import { useBoardActions } from '../../../../hooks/useActions';
 
 const BoardBottomPanel: FC = () => {
-
-    const { fullscreen: {setFullScreenBoard} } = useContext(boardContext) as TBoardContext;
 
     const platform = usePlatform();
 
     const boardContainer = document.querySelector(`.${boardStyles.boardContainer}`) as HTMLElement;
 
+    const { setFullscreen } = useBoardActions();
+
     document.addEventListener("fullscreenchange", () => {
-        if (!document.fullscreenElement) setFullScreenBoard(false);
-        else setFullScreenBoard(true);
+        if (!document.fullscreenElement) setFullscreen(false);
+        else setFullscreen(true);
     });
 
     const onFullScreen = () => {

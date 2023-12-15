@@ -1,14 +1,12 @@
 import { Div, Group, Panel, PanelHeader, PanelHeaderBack, Platform, Separator, Spinner, usePlatform } from "@vkontakte/vkui";
-import { FC, useContext, useState } from "react";
+import { FC } from "react";
 import panels from "../../config/panels";
 import localStorages from "../../config/localStorages";
-import { interfaceContext } from "../Panels";
-import { TInterfaceContext } from "../../config/types";
 import Board from "../../components/board/Board";
-import getErrorMessage from "../../utils/getErrorMessage";
 import errorsPS from "../../config/errorsPS";
-import ErrorPopout from "../../popouts/ErrorPopout";
 import useBoardData from "../../hooks/useBoardData";
+import { useBoardActions, useInterfaceActions } from "../../hooks/useActions";
+import { useCatchInterfaceError } from "../../hooks/useCatchError";
 
 interface Props {
   id: string
@@ -16,21 +14,24 @@ interface Props {
 
 const BoardPanel: FC<Props> = ({ id }) => {
 
-  const [fullScreenBoard, setFullScreenBoard] = useState(false);
+  const { setPanel } = useInterfaceActions();
 
-  const { func: {catchError}, panels: { setActivePanel } } = useContext(interfaceContext) as TInterfaceContext;
+  const { setBoardData } = useBoardActions();
+
+  const catchError = useCatchInterfaceError();
 
   const boardId = Number(localStorage.getItem(localStorages.activeBoard));
 
   const goBack = (nextPanel: string) => {
-    setActivePanel(nextPanel);
+    setPanel(nextPanel);
   };
 
   const platform = usePlatform();
 
-  const {error, data} = useBoardData().query(boardId);
+  const { error, data } = useBoardData().query(boardId);
 
-  if (error) catchError(error, errorsPS.getBoardData);
+  if (data) setBoardData(data);
+  else if (error) catchError(error, errorsPS.getBoardData);
 
   return (
     <Panel id={id}>
@@ -40,7 +41,7 @@ const BoardPanel: FC<Props> = ({ id }) => {
         {!data ? "Доска" : data.name}
       </PanelHeader>
       <Group>
-        {!data ? (<Spinner size="large" style={{ paddingBottom: "20px" }}></Spinner>) : (<Board setFullScreenBoard={setFullScreenBoard} data={data} fullScreenBoard={fullScreenBoard} />)}
+        {!data ? (<Spinner size="large" style={{ paddingBottom: "20px" }}></Spinner>) : (<Board />)}
         <Separator />
         <Div style={{ textAlign: "center" }}>Чтобы воспользоваться полным функционалом виртуальной доски, разверните её на весь экран</Div>
       </Group>

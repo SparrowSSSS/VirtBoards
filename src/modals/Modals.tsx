@@ -1,7 +1,7 @@
 import { ModalPage, ModalPageHeader, ModalRoot } from '@vkontakte/vkui';
-import { FC, useContext } from 'react'
-import { interfaceContext } from '../panels/Panels';
-import { TInterfaceContext } from '../config/types';
+import { FC } from 'react';
+import { useInterfaceActions } from '../hooks/useActions';
+import { useInterfaceSelector } from '../hooks/useStoreSelector';
 
 export const modals = {
     addBoardModal: "add-board-modal",
@@ -10,21 +10,23 @@ export const modals = {
 
 const Modals: FC = () => {
 
-    const { modals: { activeModal, setActiveModal } } = useContext(interfaceContext) as TInterfaceContext;
+    const { activeModal } = useInterfaceSelector();
+
+    const { setModal } = useInterfaceActions();
 
     return (
         <ModalRoot activeModal={activeModal?.id}>
             <ModalPage
                 id={modals.addBoardModal}
                 header={<ModalPageHeader>Новая доска</ModalPageHeader>}
-                onClose={() => setActiveModal(null)}
+                onClose={() => setModal(null)}
             >
                 {activeModal?.modal}
             </ModalPage>
             <ModalPage
                 id={modals.renameBoardModal}
                 header={<ModalPageHeader>Переименовать доску</ModalPageHeader>}
-                onClose={() => setActiveModal(null)}
+                onClose={() => setModal(null)}
             >
                 {activeModal?.modal}
             </ModalPage>
