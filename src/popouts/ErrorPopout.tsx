@@ -1,16 +1,14 @@
 import { Alert } from '@vkontakte/vkui';
-import { FC, useContext } from 'react';
-import { useInterfaceActions } from '../hooks/useActions';
+import { FC, ReactNode } from 'react';
+import { setStateF } from '../config/types';
 
 interface Props {
     message: string,
-    errorPS: string
+    errorPS: string,
+    setPopout: setStateF<ReactNode | null>
 };
 
-const ErrorPopout: FC<Props> = ({ message, errorPS }) => {
-
-    const { setPopout } = useInterfaceActions();
-
+const ErrorPopout: FC<Props> = ({ message, errorPS, setPopout }) => {
     return (
         <Alert
             onClose={() => setPopout(null)}

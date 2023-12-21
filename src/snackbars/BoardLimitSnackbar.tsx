@@ -1,7 +1,8 @@
 import { Snackbar } from '@vkontakte/vkui';
 import { FC, useContext } from 'react';
 import { Icon24ErrorCircleOutline } from '@vkontakte/icons';
-import { useInterfaceActions } from '../hooks/useActions';
+import { interfaceContext } from '../panels/Panels';
+import { TInterfaceContext } from '../config/types';
 
 interface Props {
     subtitle: string
@@ -9,7 +10,7 @@ interface Props {
 
 export const BoardLimitSnackbar: FC<Props> = ({ subtitle }) => {
 
-    const { setSnackbar } = useInterfaceActions();
+    const { snackbar: { setSnackbar } } = useContext(interfaceContext) as TInterfaceContext;
 
     return (
         <Snackbar

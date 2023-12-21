@@ -1,7 +1,6 @@
 import { TTool } from "../config/types";
 import { WheelEvent, MouseEvent, useMemo } from "react";
 import cursors from "../config/cursors";
-import { useBoardSelector } from "./useStoreSelector";
 import { useBoardActions } from "./useActions";
 import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
@@ -81,9 +80,7 @@ class BoardEvents {
     };
 };
 
-const useBoardEvents = () => {
-    const { boardWindow } = useBoardSelector();
-
+const useBoardEvents = (boardWindow: HTMLDivElement | null) => {
     const { setActiveCursor } = useBoardActions();
 
     return useMemo(() => new BoardEvents(boardWindow, setActiveCursor), [boardWindow]);

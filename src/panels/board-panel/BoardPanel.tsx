@@ -1,12 +1,14 @@
 import { Div, Group, Panel, PanelHeader, PanelHeaderBack, Platform, Separator, Spinner, usePlatform } from "@vkontakte/vkui";
-import { FC } from "react";
+import { FC, useContext, useEffect } from "react";
 import panels from "../../config/panels";
 import localStorages from "../../config/localStorages";
 import Board from "../../components/board/Board";
 import errorsPS from "../../config/errorsPS";
 import useBoardData from "../../hooks/useBoardData";
 import { useBoardActions, useInterfaceActions } from "../../hooks/useActions";
-import { useCatchInterfaceError } from "../../hooks/useCatchError";
+import { interfaceContext } from "../Panels";
+import { TInterfaceContext } from "../../config/types";
+import useCatchError from "../../hooks/useCatchError";
 
 interface Props {
   id: string
@@ -18,7 +20,9 @@ const BoardPanel: FC<Props> = ({ id }) => {
 
   const { setBoardData } = useBoardActions();
 
-  const catchError = useCatchInterfaceError();
+  const { popout: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
+
+  const catchError = useCatchError(setPopout);
 
   const boardId = Number(localStorage.getItem(localStorages.activeBoard));
 
@@ -29,9 +33,11 @@ const BoardPanel: FC<Props> = ({ id }) => {
   const platform = usePlatform();
 
   const { error, data } = useBoardData().query(boardId);
+  if (error) catchError(error, errorsPS.getBoardData);
 
-  if (data) setBoardData(data);
-  else if (error) catchError(error, errorsPS.getBoardData);
+  useEffect(() => {
+    if (data) setBoardData(data);
+  }, [data]);
 
   return (
     <Panel id={id}>

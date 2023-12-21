@@ -1,7 +1,7 @@
 import { Div, Link, usePlatform } from '@vkontakte/vkui';
 import { FC, MouseEvent, useContext } from 'react';
 import { Icon24Cancel } from '@vkontakte/icons';
-import { BoardNameAndId } from '../../config/types';
+import { BoardNameAndId, TInterfaceContext } from '../../config/types';
 import DeleteBoardPopout from '../../popouts/DeleteBoardPopout';
 import { Icon24DownloadOutline } from '@vkontakte/icons';
 import styles from "./BoardComponentAfter.module.css";
@@ -11,6 +11,7 @@ import ErrorPopout from '../../popouts/ErrorPopout';
 import loadFromUrl from "./loadFromURL";
 import GeneralService from '../../services/generalServices';
 import { useInterfaceActions } from '../../hooks/useActions';
+import { interfaceContext } from '../../panels/Panels';
 
 interface Props {
   board: BoardNameAndId
@@ -20,7 +21,7 @@ export const BoardComponentActions: FC<Props> = ({ board }) => {
 
   const platform = usePlatform();
 
-  const { setPopout } = useInterfaceActions();
+  const { popout: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
 
   const handleRemoveBoard = (boardId: number, e: MouseEvent<SVGSVGElement, globalThis.MouseEvent>, boardName: string) => {
     e.stopPropagation();
@@ -32,9 +33,10 @@ export const BoardComponentActions: FC<Props> = ({ board }) => {
 
     try {
       const boardData = await GeneralService.getBoardData(boardId);
+      console.log(boardData)
       loadFromUrl(boardData, platform);
     } catch (error) {
-      setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} />);
+      setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={errorsPS.getBoardData} setPopout={setPopout} />);
     };
   };
 

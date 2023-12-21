@@ -7,9 +7,7 @@ const initialState: TBoardOptions = {
     boardModal: null,
     boardData: null,
     activeTool: "cursor",
-    activeCursor: cursors.cursor,
-    boardWindow: null,
-    boardPopout: null
+    activeCursor: cursors.cursor
 };
 
 export const boardSlice = createSlice({
@@ -32,17 +30,9 @@ export const boardSlice = createSlice({
             state.activeCursor = action.payload;
         },
 
-        setBoardWindow: (state, action: PayloadAction<HTMLDivElement | null>) => {
-            state.boardWindow = action.payload;
-        },
-
-        setModal: (state, action: PayloadAction<TModal | null>) => {
+        setBoardModal: (state, action: PayloadAction<TModal>) => {
             state.boardModal = action.payload;
         },
-
-        setPopout: (state, action: PayloadAction<React.ReactNode | null>) => {
-            state.boardPopout = action.payload;
-        }
     }
 });
 

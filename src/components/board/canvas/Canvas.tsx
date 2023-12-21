@@ -1,17 +1,19 @@
 import "@pixi/events";
 import { Container, Stage } from '@pixi/react';
 import { Application, Container as TContainer, DisplayObject, ICanvas } from "pixi.js";
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useContext, useEffect, useRef, useState } from 'react';
 import canvasConfig from '../../../config/canvas';
 import { useCanvasActions } from "../../../hooks/useActions";
 import useCanvasDrawEvents from "../../../hooks/useCanvasDrawEvents";
 import { useBoardSelector, useCanvasSelector } from "../../../hooks/useStoreSelector";
 import getCursor from "../../../utils/getBoardCursor";
 import styles from "./Canvas.module.css";
-import { checkChanges } from "./canvasUtils";
 import Grid from './grid/Grid';
 import { Provider } from "react-redux";
 import store from "../../../app/store";
+import { boardContext } from "../Board";
+import { BoardData, TBoardContext } from "../../../config/types";
+import GraphComponent from "./graph-component/GraphComponent";
 
 const Canvas: FC = () => {
 
@@ -23,26 +25,19 @@ const Canvas: FC = () => {
 
     const { scroll, windowSize } = useCanvasSelector();
 
-    const { setScroll, setWindowSize } = useCanvasActions();
+    const { setWindowSize } = useCanvasActions();
 
-    const { boardWindow, fullscreen, activeCursor, activeTool, boardData } = useBoardSelector();
+    const { fullscreen, activeCursor, activeTool, boardData } = useBoardSelector();
+
+    const { window: { boardWindow } } = useContext(boardContext) as TBoardContext;
 
     const draw = useCanvasDrawEvents(canvasContainerRef, app);
 
     useEffect(() => {
-        if (boardWindow && checkChanges(boardWindow, { scroll, windowSize })) {
-            setScroll({ x: boardWindow.scrollLeft, y: boardWindow.scrollTop });
+        if (boardWindow) {
             setWindowSize({ w: boardWindow.clientWidth, h: boardWindow.clientHeight });
         };
-    }, [render]);
-
-    useEffect(() => {
-        const r = { render: render };
-        setInterval(() => {
-            setRender(!r.render);
-            r.render = !r.render;
-        }, 25);
-    }, []);
+    }, [boardWindow]);
 
     return (
         <Stage
@@ -54,14 +49,20 @@ const Canvas: FC = () => {
             raf={false}
             renderOnComponentChange={true}
             onMouseDown={e => draw.stageDown(e, activeTool, fullscreen)}
-            onMouseMove={draw.stageMove}
-            onMouseUp={draw.stageOut}
-            onMouseOut={draw.stageOut}
+            onMouseMove={e => draw.stageMove(e, setRender)}
+            onMouseUp={() => draw.stageOut(boardData as BoardData, scroll)}
+            onMouseOut={() => draw.stageOut(boardData as BoardData, scroll)}
             onMount={setApp}
         >
             <Provider store={store}>
                 <Container ref={canvasContainerRef}>
                     {boardData?.settings.grid ? <Grid /> : null}
+
+                    {
+                        boardData?.components.map(component => (
+                            <GraphComponent key={component.id} component={component} />
+                        ))
+                    }
                 </Container>
             </Provider>
         </Stage>

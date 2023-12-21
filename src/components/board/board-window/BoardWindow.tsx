@@ -1,27 +1,30 @@
-import { FC, useEffect } from 'react';
+import { FC, useContext, useEffect } from 'react';
 import canvasConfig from '../../../config/canvas';
 import elementsId from '../../../config/elementsId';
-import { useBoardActions } from '../../../hooks/useActions';
+import { TBoardContext } from '../../../config/types';
 import { useBoardSelector } from '../../../hooks/useStoreSelector';
+import { boardContext } from '../Board';
 import Canvas from '../canvas/Canvas';
 import styles from "./BoardWindow.module.css";
 
 const BoardWindow: FC = () => {
 
-    const { setBoardWindow } = useBoardActions();
+    const { window: { boardWindow, setBoardWindow } } = useContext(boardContext) as TBoardContext;
+
     const { boardData } = useBoardSelector();
 
     useEffect(() => {
-        const boardWindow = document.getElementById(elementsId.boardWindow) as HTMLDivElement;
-
         if (boardWindow) {
-            setBoardWindow(boardWindow);
-
             if (boardData?.components.length === 0) {
                 boardWindow.scrollBy(Math.ceil(canvasConfig.width / 2), Math.ceil(canvasConfig.height / 2));
-            };
+            }
         };
+    }, [boardWindow])
 
+    useEffect(() => {
+        const bw = document.getElementById(elementsId.boardWindow) as HTMLDivElement;
+
+        if (bw) setBoardWindow(bw);
     }, []);
 
     return (

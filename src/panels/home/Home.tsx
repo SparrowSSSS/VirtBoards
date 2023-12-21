@@ -1,15 +1,15 @@
 import { Avatar, Group, Link, Panel, PanelHeader, Placeholder, Separator } from "@vkontakte/vkui";
-import { FC, useEffect } from "react";
+import { FC, useContext, useEffect } from "react";
 import BoardsList from "../../components/board-list/BoardsList";
 import panels from "../../config/panels";
 import errorsPS from "../../config/errorsPS";
 import BridgeStorage from "../../services/bridgeServices";
-import GeneralService from "../../services/generalServices";
 import { useQuery } from "@tanstack/react-query";
 import queryTags from "../../config/queryTags";
 import { useInterfaceActions } from "../../hooks/useActions";
-import { useCatchInterfaceError } from "../../hooks/useCatchError";
-import { useInterfaceSelector } from "../../hooks/useStoreSelector";
+import useCatchError from "../../hooks/useCatchError";
+import { interfaceContext } from "../Panels";
+import { TInterfaceContext } from "../../config/types";
 
 interface Props {
   id: string
@@ -19,7 +19,9 @@ const Home: FC<Props> = ({ id }) => {
 
   const { setPanel, setUserName } = useInterfaceActions();
 
-  const catchError = useCatchInterfaceError();
+  const { popout: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
+
+  const catchError = useCatchError(setPopout);
 
   const go = (nextPanel: string) => {
     setPanel(nextPanel);

@@ -5,8 +5,16 @@ export type BoardNameAndId = {
     id: number
 };
 
+export type TCoords = { x: number, y: number };
+
+export type TGraphOptions = {
+    compressUrl: string,
+    position: TCoords
+};
+
 export type BoardComponent = {
-    type: string
+    id: number,
+    options: TGraphOptions
 };
 
 export type TSettings = {
@@ -22,25 +30,22 @@ export type BoardData = {
 
 export type onClickRemoveBoard = (i: number) => void;
 
-export type TModal = {
-    id: string,
-    modal: ReactNode
-};
-
 export type setStateF<T> = (value: SetStateAction<T>) => void;
 
 export type TScroll = { x: number, y: number };
 
 export type TWindowSize = { w: number, h: number };
 
+export type TRenameModalProps = { id: number, name: string, index: number }
+
+export type TModal = { id: string, renameModalProps?: TRenameModalProps } | null
+
 export type TInterfaceOptions = {
     activePanel: string,
-    activeModal: TModal | null,
-    popout: ReactNode | null,
     boardsList: BoardNameAndId[],
     userName: string,
-    snackbar: ReactNode | null,
-    isLoading: boolean
+    isLoading: boolean,
+    activeModal: TModal
 };
 
 export type TBoardOptions = {
@@ -48,9 +53,7 @@ export type TBoardOptions = {
     boardData: BoardData | null,
     activeTool: TTool,
     activeCursor: string,
-    boardWindow: any,
-    boardModal: TModal | null,
-    boardPopout: ReactNode | null
+    boardModal: TModal
 };
 
 export type TCanvasOptions = {
@@ -60,6 +63,32 @@ export type TCanvasOptions = {
 
 export type TEventOptions = {
     mouseDown: boolean
+};
+
+export type TBoardContext = {
+    popout: {
+        boardPopout: ReactNode | null,
+        setBoardPopout: setStateF<ReactNode | null>
+    },
+
+    window: {
+        boardWindow: HTMLDivElement | null,
+        setBoardWindow: setStateF<HTMLDivElement | null>
+    }
+
+};
+
+export type TInterfaceContext = {
+    popout: {
+        interfacePopout: ReactNode | null,
+        setPopout: setStateF<ReactNode | null>
+    },
+
+    snackbar: {
+        interfaceSnackbar: ReactNode | null,
+        setSnackbar: setStateF<ReactNode | null>
+    }
+
 };
 
 export type TTool = "cursor" | "pencil" | "eraser";

@@ -17,7 +17,7 @@ const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
 
     const { fullscreen, boardData } = useBoardSelector();
 
-    const { setModal } = useBoardActions();
+    const { setBoardModal } = useBoardActions();
 
     const valBoardName = (name: string): string => {
         return name.length <= 11 ? name : name.slice(0, 11) + "...";
@@ -37,7 +37,7 @@ const VKCOMPanel: FC<Props> = ({ onFullScreen, offFullScreen }) => {
                     <div className={`${styles.boardBottomPanel} ${styles.boardBottomPanelFullScreen}`} style={boardBottomPanelFullScreen}>
                         <div style={{ color: "#222222", fontWeight: "bold" }}>{valBoardName((boardData as BoardData).name)}</div>
                         <div style={{ display: "flex" }}>
-                            <div className={styles.bottomPanelButton} style={{ marginRight: "15px" }} onClick={() => setModal({ id: boardModals.settingsModal, modal: <SettingModal /> })}>
+                            <div className={styles.bottomPanelButton} style={{ marginRight: "15px" }} onClick={() => setBoardModal({ id: boardModals.settingsModal })}>
                                 <Icon24Settings className={`${styles.boardIcon}`}></Icon24Settings>
                             </div>
                             <div onClick={() => offFullScreen()} className={styles.bottomPanelButton} >

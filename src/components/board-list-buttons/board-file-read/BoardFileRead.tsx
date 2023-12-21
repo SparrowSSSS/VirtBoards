@@ -1,12 +1,14 @@
 import { Icon24Document } from '@vkontakte/icons';
 import { File, Platform, usePlatform } from '@vkontakte/vkui';
-import { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC, useContext } from 'react';
 import errorsPS from '../../../config/errorsPS';
 import globalConfig from '../../../config/global';
+import { TInterfaceContext } from '../../../config/types';
 import { useInterfaceActions } from '../../../hooks/useActions';
 import useBoardMutation from '../../../hooks/useBoardMutation';
-import { useCatchInterfaceError } from '../../../hooks/useCatchError';
+import useCatchError from '../../../hooks/useCatchError';
 import { useInterfaceSelector } from '../../../hooks/useStoreSelector';
+import { interfaceContext } from '../../../panels/Panels';
 import BoardLimitSnackbar from '../../../snackbars/BoardLimitSnackbar';
 import readerLoad from './readerLoad';
 import validJSON from './validJSON';
@@ -15,10 +17,14 @@ export const BoardFileRead: FC = () => {
 
     const platform = usePlatform();
 
-    const { setBoardsList, setSnackbar } = useInterfaceActions();
+    const { setBoardsList } = useInterfaceActions();
     const { boardsList } = useInterfaceSelector();
 
-    const catchError = useCatchInterfaceError();
+    const { snackbar: { setSnackbar } } = useContext(interfaceContext) as TInterfaceContext;
+
+    const { popout: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
+
+    const catchError = useCatchError(setPopout);
 
     const loadBoard = useBoardMutation().add(setBoardsList);
 

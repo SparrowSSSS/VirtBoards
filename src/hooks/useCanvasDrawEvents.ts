@@ -1,11 +1,9 @@
 import { MutableRefObject, MouseEvent, useMemo } from "react";
 import { Application, Container as TContainer, DisplayObject, Graphics, ICanvas } from "pixi.js";
-import { BoardData, TTool } from "../config/types";
+import { BoardComponent, BoardData, setStateF, TCoords, TScroll, TTool } from "../config/types";
 import LZString from "lz-string";
 import { useBoardActions, useEventActions } from "./useActions";
 import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
-
-type TCoords = { x: number, y: number };
 
 class CanvasDrawEvents {
     canvasContainerRef: MutableRefObject<TContainer<DisplayObject> | null>;
@@ -17,17 +15,23 @@ class CanvasDrawEvents {
     setBoardData: ActionCreatorWithPayload<BoardData | null, "board/setBoardData">;
     minX: number = 0;
     minY: number = 0;
+    lineWidth: number = 2;
+    cursorMarginY: number = 24;
+    cursorMarginX: number = 3;
+    color: string;
 
     constructor(
         canvasContainerRef: MutableRefObject<TContainer<DisplayObject> | null>,
         setMouseDown: ActionCreatorWithPayload<boolean, "events/setMouseDown">,
         app: Application<ICanvas> | null,
-        setBoardData: ActionCreatorWithPayload<BoardData | null, "board/setBoardData">
+        setBoardData: ActionCreatorWithPayload<BoardData | null, "board/setBoardData">,
+        color: string
     ) {
         this.canvasContainerRef = canvasContainerRef;
         this.setMouseDown = setMouseDown;
         this.app = app;
         this.setBoardData = setBoardData;
+        this.color = color;
     }
 
     stageDown = (e: MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>, tool: TTool, fullscreen: boolean) => {
@@ -39,14 +43,14 @@ class CanvasDrawEvents {
 
         this.canvasContainerRef.current.addChild(graph as DisplayObject);
 
-        const y = e.clientY + 24;
-        const x = e.clientX + 3;
+        const y = e.clientY + this.cursorMarginY;
+        const x = e.clientX + this.cursorMarginX;
 
         this.minX = x;
         this.minY = y;
 
-        graph.beginFill("red", 1);
-        graph.drawCircle(x, y, 2 / 2);
+        graph.beginFill(this.color, 1);
+        graph.drawCircle(x, y, this.lineWidth / 2);
 
         this.graph = graph;
 
@@ -54,18 +58,20 @@ class CanvasDrawEvents {
         this.firstCoords = { x: x, y: y };
     }
 
-    stageMove = (e: MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>) => {
+    stageMove = (e: MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>, setRender: setStateF<boolean>) => {
         if (!this.graph) return;
 
-        const y = e.clientY + 24;
-        const x = e.clientX + 3;
+        setRender(p => p ? false : true);
+
+        const y = e.clientY + this.cursorMarginY;
+        const x = e.clientX + this.cursorMarginX;
 
         if (x < this.minX) this.minX = x;
         if (y < this.minY) this.minY = y;
 
-        this.graph.drawCircle(x, y, 2 / 2);
+        this.graph.drawCircle(x, y, this.lineWidth / 2);
 
-        this.graph.lineStyle(2, "red", 1);
+        this.graph.lineStyle(this.lineWidth, this.color, 1);
         this.graph.moveTo(this.currentCoords.x, this.currentCoords.y);
         this.graph.lineTo(x, y);
         this.graph.lineStyle(0);
@@ -73,7 +79,7 @@ class CanvasDrawEvents {
         this.currentCoords = { x: x, y: y };
     }
 
-    stageOut = async () => {
+    stageOut = async (boardData: BoardData, scroll: TScroll) => {
         if (!this.graph) return;
 
         const blob = await this.app?.renderer.extract.base64(this.graph as DisplayObject);
@@ -81,7 +87,24 @@ class CanvasDrawEvents {
         if (blob) {
             const compressBlob = LZString.compress(blob);
 
-            const position: TCoords = { x: this.minX, y: this.minY };
+            const position: TCoords = { x: this.minX + scroll.x, y: this.minY + scroll.y };
+
+            const boardComponents = boardData.components;
+
+            let id;
+
+            if (boardComponents.length === 0) {
+                id = 0;
+            } else {
+                id = boardComponents[boardComponents.length - 1].id + 1;
+            };
+
+            const newComponent: BoardComponent = { id: id, options: { compressUrl: compressBlob, position: position } };
+
+            const components = [...boardComponents, newComponent];
+
+            this.setBoardData({ ...boardData, components: components });
+
         };
 
         this.setMouseDown(false);
@@ -94,7 +117,9 @@ const useCanvasDrawEvents = (canvasContainerRef: MutableRefObject<TContainer<Dis
     const { setBoardData } = useBoardActions();
     const { setMouseDown } = useEventActions();
 
-    return useMemo(() => new CanvasDrawEvents(canvasContainerRef, setMouseDown, app, setBoardData), [app]);
+    const color = "red";
+
+    return useMemo(() => new CanvasDrawEvents(canvasContainerRef, setMouseDown, app, setBoardData, color), [app, color]);
 };
 
 export default useCanvasDrawEvents;

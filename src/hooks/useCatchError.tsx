@@ -1,24 +1,15 @@
-import { TCatchError } from "../config/types";
-import { useInterfaceActions, useBoardActions } from "./useActions";
+import { setStateF, TCatchError } from "../config/types";
 import ErrorPopout from "../popouts/ErrorPopout";
 import getErrorMessage from "../utils/getErrorMessage";
+import { ReactNode } from "react";
 
-export const useCatchInterfaceError = () => {
-    const setP = useInterfaceActions().setPopout;
+const useCatchError = (setPopout: setStateF<ReactNode | null>) => {
 
     const func: TCatchError = (error, ps) => {
-        setP(<ErrorPopout message={getErrorMessage(error)} errorPS={ps} />)
+        setPopout(<ErrorPopout message={getErrorMessage(error)} errorPS={ps} setPopout={setPopout} />)
     };
 
     return func;
 };
 
-export const useCatchVirtBoardError = () => {
-    const setP = useBoardActions().setPopout;
-
-    const func: TCatchError = (error, ps) => {
-        setP(<ErrorPopout message={getErrorMessage(error)} errorPS={ps} />)
-    };
-
-    return func;
-};
+export default useCatchError

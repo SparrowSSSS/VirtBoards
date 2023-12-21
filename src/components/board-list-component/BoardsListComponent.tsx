@@ -26,7 +26,7 @@ const BoardsListComponent: FC<Props> = ({ board, index }) => {
 
     const handleRenameBoard = (boardId: number, e: MouseEvent<SVGSVGElement, globalThis.MouseEvent>, boardName: string) => {
         e.stopPropagation();
-        setModal({ id: modals.renameBoardModal, modal: <RenameBoardModal boardId={boardId} boardName={boardName} index={index} /> });
+        setModal({ id: modals.renameBoardModal, renameModalProps: { id: boardId, index: index, name: boardName } });
     };
 
     return (

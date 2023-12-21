@@ -1,9 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import GeneralService from "../services/generalServices";
-import { BoardData, BoardNameAndId } from "../config/types";
+import { BoardData, BoardNameAndId, TInterfaceContext } from "../config/types";
 import errorsPS from "../config/errorsPS";
 import { useInterfaceActions } from "./useActions";
-import { useCatchInterfaceError } from "./useCatchError";
+import useCatchError from "./useCatchError";
+import { useContext } from "react";
+import { interfaceContext } from "../panels/Panels";
 
 type TCallback = (list: BoardNameAndId[]) => void;
 
@@ -17,7 +19,9 @@ const useBoardMutation = () => {
 
     const setLoading = useInterfaceActions().setLoading;
 
-    const catchError = useCatchInterfaceError();
+    const { popout: { setPopout } } = useContext(interfaceContext) as TInterfaceContext;
+
+    const catchError = useCatchError(setPopout);
 
     const deleteBoard = (options: TDeleteOptions) => {
         setLoading(true);

@@ -10,14 +10,7 @@ const store = configureStore({
         board: boardReducer,
         canvas: canvasReducer,
         events: eventsReducer
-    },
-
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: ["interface/setPopout", "interface/setModal", "board/setBoardWindow", "board/setModal", "board/setPopout"]
-            }
-        })
+    }
 });
 
 export type RootState = ReturnType<typeof store.getState>;
